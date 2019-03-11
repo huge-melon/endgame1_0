@@ -1,5 +1,9 @@
 package com.shixin.endgame.entity;
 
+
+import org.springframework.context.annotation.Bean;
+
+
 public class DBinfo {
     private String dbType;
     private String dbUrl;

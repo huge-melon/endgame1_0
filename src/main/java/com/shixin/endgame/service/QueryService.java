@@ -1,5 +1,6 @@
 package com.shixin.endgame.service;
 
+import com.shixin.endgame.entity.DBinfo;
 import com.shixin.endgame.entity.User;
 import com.shixin.endgame.mapper.mysql.MysqlMapper;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
@@ -8,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -28,6 +30,14 @@ public class QueryService {
   //  SqlSessionFactory oralsqlSessionFactory;
 
     private final Logger logger= LoggerFactory.getLogger(this.getClass());
+
+
+    @Bean(name = "mysqlDBinfo")
+    public DBinfo setDBinfo(DBinfo dBinfo){
+        return dBinfo;
+    }
+
+
     /**
      * 设置数据库的用户名和密码
      *
@@ -39,6 +49,7 @@ public class QueryService {
      * @param urlSID
      * @return
      */
+
      public boolean setDataSource(String dbType,String userName,String passWord,String urlIP,String urlPort,String urlSID){
          PooledDataSource pooledDataSource=getDatasource(dbType);
          pooledDataSource.setUsername(userName);

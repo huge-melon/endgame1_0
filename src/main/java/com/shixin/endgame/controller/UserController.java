@@ -21,9 +21,9 @@ import java.util.Map;
 public class UserController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    /*@Autowired
+    @Autowired
     private QueryService queryService;
-*/
+
     /*@PostMapping("/gettable")
     public Map<String,Object> getTable(@RequestBody Map<String,String> paramMap){
         String dbType=paramMap.getOrDefault("dbType","");
@@ -45,6 +45,8 @@ public class UserController {
         dBinfo.setDbName(dbName);
         dBinfo.setUserName(userName);
         dBinfo.setUserPassword(userPassword);
+
+        queryService.setDBinfo(dBinfo);
 
         System.out.println("***********"+dBinfo.toString());
 

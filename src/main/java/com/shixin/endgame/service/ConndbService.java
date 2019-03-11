@@ -10,12 +10,14 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.sql.SQLException;
 import java.util.HashMap;
-
+@org.springframework.context.annotation.Configuration
+@MapperScan(basePackages = "com.userdefine.demo.mapper.mysql",sqlSessionFactoryRef ="mysqlSqlSessionFactory" )
 public class ConndbService {
 
     private HashMap<String,String> dbDriver ;
