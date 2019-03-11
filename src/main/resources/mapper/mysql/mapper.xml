@@ -1,7 +1,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.shixin.endgame.mapper.mysql.MysqlMapper">
+<mapper namespace="com.shixin.endgame.dao.mysql.MysqlMapper">
 
     <!--获取表格数据-->
     <select id="getData" resultType="java.util.Map">

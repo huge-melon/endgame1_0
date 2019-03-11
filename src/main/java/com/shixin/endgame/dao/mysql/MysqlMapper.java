@@ -1,7 +1,5 @@
-package com.shixin.endgame.mapper.mysql;
+package com.shixin.endgame.dao.mysql;
 
-import com.shixin.endgame.entity.User;
-import com.shixin.endgame.mapper.MyMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

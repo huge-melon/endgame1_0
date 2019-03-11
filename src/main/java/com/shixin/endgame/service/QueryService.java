@@ -1,15 +1,10 @@
 package com.shixin.endgame.service;
 
-import com.shixin.endgame.entity.DBinfo;
-import com.shixin.endgame.entity.User;
-import com.shixin.endgame.mapper.mysql.MysqlMapper;
+import com.shixin.endgame.dao.mysql.MysqlMapper;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

@@ -2,10 +2,11 @@ package com.shixin.endgame.controller;
 
 import com.shixin.endgame.config.MysqlConfig;
 import com.shixin.endgame.entity.DBinfo;
-import com.shixin.endgame.entity.User;
-import com.shixin.endgame.mapper.mysql.MysqlMapper;
+import com.shixin.endgame.dao.mysql.MysqlMapper;
+import com.shixin.endgame.service.CleanService;
 import com.shixin.endgame.service.ConndbService;
 import com.shixin.endgame.service.QueryService;
+import com.shixin.endgame.service.StoreService;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
@@ -21,9 +22,27 @@ import java.util.Map;
 @RequestMapping("/test")
 public class UserController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private HashMap<String,SqlSession> dbSessionMap;
 
     @Autowired
-    private QueryService queryService;
+    private CleanService cleanService;//清洗
+    @Autowired
+    private StoreService storeService;//存储
+    @Autowired
+    private QueryService queryService;//查询
+
+    @Autowired
+    private ConndbService conndbService;//连接数据库
+    //负责数据库连接
+    // 通用接口，内部根据dbType调用不同的方法，
+    //将sqlsession存放到HashMap中
+
+
+    //初始化MAP，map应该放到，conndbService中？？？？？？？？？？？？？？？？？？
+    public UserController(){
+
+    }
+
 
     /*@PostMapping("/gettable")
     public Map<String,Object> getTable(@RequestBody Map<String,String> paramMap){
@@ -36,8 +55,11 @@ public class UserController {
 
     }*/
 
+
+
+
     // 添加数据库连接功能
-    @GetMapping("/adddb")
+    @PostMapping("/adddb")
     public List<Map<String,Object>> addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword) throws Exception {
         DBinfo dBinfo=new DBinfo();
         dBinfo.setDbType(dbType);
@@ -47,9 +69,13 @@ public class UserController {
         dBinfo.setUserName(userName);
         dBinfo.setUserPassword(userPassword);
 
+        conndbService.setDbinfo(dBinfo);
+
+
+
         MysqlConfig mysqlConfig= new MysqlConfig();
 
-        SqlSessionFactory sqlSessionFactory=mysqlConfig.sqlSessionFactory(dBinfo);
+        SqlSessionFactory sqlSessionFactory=mysqlConfig.sqlSessionFactory();
 
 
         System.out.println("***********"+dBinfo.toString());
