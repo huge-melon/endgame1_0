@@ -20,10 +20,10 @@ import java.util.Map;
 public class QueryService {
     //@Autowired
     MysqlMapper mysqlMapper;
-    @Autowired @Qualifier("mysqlDataSource")
+   // @Autowired @Qualifier("mysqlDataSource")
     PooledDataSource mysqlDataSource;
 
-    @Autowired @Qualifier("mysqlSqlSessionFactory")
+   // @Autowired @Qualifier("mysqlSqlSessionFactory")
     SqlSessionFactory mysqlSqlSessionFactory;
 
     //@Autowired @Qualifier("oracleSqlSessionFactory")
@@ -31,11 +31,6 @@ public class QueryService {
 
     private final Logger logger= LoggerFactory.getLogger(this.getClass());
 
-
-    @Bean(name = "mysqlDBinfo")
-    public DBinfo setDBinfo(DBinfo dBinfo){
-        return dBinfo;
-    }
 
 
     /**

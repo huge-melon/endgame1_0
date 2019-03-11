@@ -1,5 +1,6 @@
 package com.shixin.endgame.controller;
 
+import com.shixin.endgame.config.MysqlConfig;
 import com.shixin.endgame.entity.DBinfo;
 import com.shixin.endgame.entity.User;
 import com.shixin.endgame.mapper.mysql.MysqlMapper;
@@ -37,7 +38,7 @@ public class UserController {
 
     // 添加数据库连接功能
     @GetMapping("/adddb")
-    public List<Map<String,Object>> addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword){
+    public List<Map<String,Object>> addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword) throws Exception {
         DBinfo dBinfo=new DBinfo();
         dBinfo.setDbType(dbType);
         dBinfo.setDbUrl(dbUrl);
@@ -46,14 +47,17 @@ public class UserController {
         dBinfo.setUserName(userName);
         dBinfo.setUserPassword(userPassword);
 
-        queryService.setDBinfo(dBinfo);
+        MysqlConfig mysqlConfig= new MysqlConfig();
+
+        SqlSessionFactory sqlSessionFactory=mysqlConfig.sqlSessionFactory(dBinfo);
+
 
         System.out.println("***********"+dBinfo.toString());
 
-        ConndbService conndbService=new ConndbService();
+/*        ConndbService conndbService=new ConndbService();
 
 
-        SqlSessionFactory sqlSessionFactory= conndbService.setDataSource(dBinfo);
+        SqlSessionFactory sqlSessionFactory= conndbService.setDataSource(dBinfo);*/
         SqlSession session=sqlSessionFactory.openSession();
 
         MysqlMapper mysqlMapper=session.getMapper(MysqlMapper.class);
