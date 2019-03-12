@@ -19,17 +19,30 @@ import javax.activation.DataSource;
 import java.io.IOException;
 import java.util.Properties;
 
-@Configuration
+/*
+@Configuration*/
 @MapperScan(basePackages = "com.shixin.endgame.dao.mysql",sqlSessionFactoryRef = "mysqlSqlSessionFactory")
 
 public class MysqlConfig {
 
-    @Autowired
     private DBinfo dBinfo;
     //private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    public MysqlConfig(){
+
+    }
+    public MysqlConfig(DBinfo db){
+        dBinfo=db;
+        System.out.println("Const:  "+dBinfo.toString());
+
+    }
+
+/*
     @Bean(name = "mysqlDataSource")
+*/
     public PooledDataSource mysqlDataSource() {
+
+        System.out.println("dataSource:  "+dBinfo.toString());
         String url = "jdbc:mysql://" + dBinfo.getDbUrl() + ':' + dBinfo.getDbPort() + '/' + dBinfo.getDbName();
         //修改地方，添加连接属性
         String conf = "?serverTimezone=GMT%2B8";
@@ -43,11 +56,16 @@ public class MysqlConfig {
     }
 
 
+/*
     @Bean(name = "mysqlSqlSessionFactory")
-    public SqlSessionFactory sqlSessionFactory(@Qualifier("mysqlDataSource") PooledDataSource dataSource) throws Exception {
+*/
+    public SqlSessionFactory sqlSessionFactory(/*@Qualifier("mysqlDataSource")*/ PooledDataSource dataSource) throws Exception {
         SqlSessionFactoryBean sessionFactoryBean = new SqlSessionFactoryBean();
         sessionFactoryBean.setDataSource(dataSource);
-        sessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:dao/mysql/*.xml"));
+        sessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapper/mysql/*.xml"));
+
+        System.out.println("sqlSessionFactory"+dBinfo.toString());
+        System.out.println(sessionFactoryBean.getObject().toString());
 
         return sessionFactoryBean.getObject();
     }

@@ -1,5 +1,7 @@
 package com.shixin.endgame.service;
 
+import com.shixin.endgame.config.MysqlConfig;
+import com.shixin.endgame.config.OracleConfig;
 import com.shixin.endgame.entity.DBinfo;
 import com.shixin.endgame.dao.mysql.MysqlMapper;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
@@ -10,6 +12,8 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jdbc.metadata.DataSourcePoolMetadata;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
@@ -26,62 +30,48 @@ public class ConndbService {
     //删除数据库
     //根据名称返回对应的session
 
-    private HashMap<String,String> dbDriver ;
+/*
+    @Autowired
+    SqlSessionFactory mysqlSqlSessionFactory;
+*/
+
+    private MysqlConfig mysqlConfig;
+    private OracleConfig oracleConfig;
+    private SqlSessionFactory mysqlSqlSessionFactory;
+
+    private static HashMap<String,String> dbDriver ;
+    private static HashMap<String,SqlSessionFactory> dbSession=new HashMap<>();
 
     public ConndbService(){
         dbDriver=new HashMap<>();
         dbDriver.put("MySQL","com.mysql.cj.jdbc.Driver");
+        dbDriver.put("Oracle","oracle.jdbc.driver.OracleDriver");
     }
 
 
-
-    //将从页面上读取的DBinfo，装配到数据库Mysqlconfig中
-    写法有问题，自己注入自己
-    @Bean(name = "DBinfo")
-    public DBinfo setDbinfo(DBinfo dBinfo){
-        return dBinfo;
-    }
+    public boolean setDataSource(DBinfo dBinfo) throws Exception {
 
 
+        System.out.println("setDataSource:  "+dBinfo.toString());
 
-    public SqlSessionFactory setDataSource(DBinfo dBinfo){
-
-        String url="jdbc:mysql://"+dBinfo.getDbUrl()+':'+dBinfo.getDbPort()+'/'+dBinfo.getDbName();
-        //修改地方，添加连接属性
-        String conf="?serverTimezone=GMT%2B8";
-        //构建数据库连接池
-        PooledDataSource dataSource = new PooledDataSource();
-        dataSource.setDriver(dbDriver.get(dBinfo.getDbType()));
-        dataSource.setUrl(url+conf);
-        dataSource.setUsername(dBinfo.getUserName());
-        dataSource.setPassword(dBinfo.getUserPassword());
-        //构建数据库事务方式
-        TransactionFactory transactionFactory = new JdbcTransactionFactory();
-        //创建数据库运行环境
-        Environment environment= new Environment("development",transactionFactory,dataSource);
-
-        //构建Configuration对象
-        Configuration configuration = new Configuration(environment);
-
-        //注册一个MyBatis上下文别名
-        //111111
-        //加入一个映射器
-
-        configuration.addMapper(MysqlMapper.class);
-
-        //使用SqlSessionFactoryBuilder构建SqlSessionFactory
-        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
-
-
-        try {
-            System.out.println(dataSource.getConnection());
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if(dBinfo.getDbType().equals("MySQL")){
+            System.out.println(12345);
+            mysqlConfig=new MysqlConfig(dBinfo);
+            PooledDataSource dataSource=mysqlConfig.mysqlDataSource();
+            mysqlSqlSessionFactory=mysqlConfig.sqlSessionFactory(dataSource);
+            dbSession.put(dBinfo.getDbType()+dBinfo.getDbName(),mysqlSqlSessionFactory);
+        }
+        else if(dBinfo.getDbType()=="Oracle"){
+            oracleConfig=new OracleConfig(dBinfo);
         }
 
-        return  sqlSessionFactory;
-
+        System.out.println(dbSession.toString());
+        return  true;
     }
 
+    public SqlSessionFactory getSqlsessionFactory(String dbType,String dbName) {
 
+        System.out.println("getTable: "+dbSession.get(dbType+dbName));
+        return dbSession.get(dbType+dbName);
+    }
 }

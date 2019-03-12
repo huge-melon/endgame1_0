@@ -59,8 +59,8 @@ public class UserController {
 
 
     // 添加数据库连接功能
-    @PostMapping("/adddb")
-    public List<Map<String,Object>> addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword) throws Exception {
+    @GetMapping("/adddb")
+    public boolean addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword) throws Exception {
         DBinfo dBinfo=new DBinfo();
         dBinfo.setDbType(dbType);
         dBinfo.setDbUrl(dbUrl);
@@ -69,30 +69,49 @@ public class UserController {
         dBinfo.setUserName(userName);
         dBinfo.setUserPassword(userPassword);
 
-        conndbService.setDbinfo(dBinfo);
+        conndbService.setDataSource(dBinfo);
 
-
-
-        MysqlConfig mysqlConfig= new MysqlConfig();
-
-        SqlSessionFactory sqlSessionFactory=mysqlConfig.sqlSessionFactory();
-
+        /*
 
         System.out.println("***********"+dBinfo.toString());
 
-/*        ConndbService conndbService=new ConndbService();
+*//*        ConndbService conndbService=new ConndbService();
 
 
-        SqlSessionFactory sqlSessionFactory= conndbService.setDataSource(dBinfo);*/
+        SqlSessionFactory sqlSessionFactory= conndbService.setDataSource(dBinfo);*//*
         SqlSession session=sqlSessionFactory.openSession();
 
         MysqlMapper mysqlMapper=session.getMapper(MysqlMapper.class);
 
-        System.out.println(mysqlMapper.getTables(dbName).toString());
-        return mysqlMapper.getTables(dbName);
+        System.out.println(mysqlMapper.getTables(dbName).toString());*/
+
+        return true;
 
 
     }
+    @GetMapping("/gettable")
+    public List<Map<String,Object>> getTable(@RequestParam String dbType,@RequestParam String dbName){
+
+        System.out.println("dbType:"+dbType);
+        System.out.println("dbName:"+dbName);
+//这里应该写到Service层中
+        SqlSessionFactory sqlSessionFactory=conndbService.getSqlsessionFactory(dbType,dbName);
+        SqlSession session=sqlSessionFactory.openSession();
+        if(dbType.equals("MySQL")) {
+            MysqlMapper mysqlMapper=session.getMapper(MysqlMapper.class);
+            return mysqlMapper.getTables(dbName);
+        }
+        else if(dbType=="Oracle"){
+
+        }
+        else{
+            System.out.println("error");
+        }
+        return null;
+
+
+    }
+
 
 /*
     @RequestMapping("/mytest")

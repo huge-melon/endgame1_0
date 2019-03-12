@@ -1,6 +1,7 @@
 package com.shixin.endgame.dao.mysql;
 
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
