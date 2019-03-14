@@ -2,6 +2,7 @@ package com.shixin.endgame.service;
 
 import com.shixin.endgame.dao.mysql.MysqlMapper;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,17 +29,74 @@ public class QueryService {
 
 
 
-    /**
-     * 设置数据库的用户名和密码
-     *
-     * @param urlIP
-     * @param urlPort
-     * @param dbType
-     * @param userName
-     * @param passWord
-     * @param urlSID
+
+
+     /**
+      * 获取表中数据
+      * @param tableName
+      * @return
+      */
+     public List<Map<String,Object>> getTableData(String dbType ,String dbName,String tableName,SqlSessionFactory sqlSessionFactory){
+         return getMapper(dbType).getData(tableName);
+     }
+
+     /**
+     * 获取数据库中的表
      * @return
      */
+     public List<Map<String,Object>> getTables(String dbType, String dbName,SqlSessionFactory sqlSessionFactory){
+
+         SqlSession session=sqlSessionFactory.openSession();
+         if(dbType.equals("MySQL")) {
+             MysqlMapper mysqlMapper=session.getMapper(MysqlMapper.class);
+             return mysqlMapper.getTables(dbName);
+         }
+         else if(dbType=="Oracle"){
+
+         }
+         else{
+             System.out.println("error");
+         }
+         return null;
+     }
+
+
+     public List<String> selectALlUser() throws Exception {
+          return mysqlMapper.selectAllUser();
+
+     }
+
+     private PooledDataSource getDatasource(String dbType) {
+         if(dbType.equals("mysql")){
+             return mysqlDataSource;
+         }
+         else
+             return null;
+     }
+
+     private MysqlMapper getMapper(String dbType){
+         if(dbType.equals("mysql")){
+             return mysqlMapper;
+         }
+         else
+             return null;
+     }
+
+}
+
+
+
+/* *//**
+ * 设置数据库的用户名和密码
+ *
+ * @param urlIP
+ * @param urlPort
+ * @param dbType
+ * @param userName
+ * @param passWord
+ * @param urlSID
+ * @return
+ *//*
 
      public boolean setDataSource(String dbType,String userName,String passWord,String urlIP,String urlPort,String urlSID){
          PooledDataSource pooledDataSource=getDatasource(dbType);
@@ -52,10 +110,10 @@ public class QueryService {
          else
              return false;
 
-         /*
-         *else if(dbType.equals("oracle"))
-          * pooledDataSource.setUrl("jdbc:oracle:thin:@\"+urlIP+\":\"+urlPort+\":\"+urlSID");
-          */
+         *//*
+ *else if(dbType.equals("oracle"))
+ * pooledDataSource.setUrl("jdbc:oracle:thin:@\"+urlIP+\":\"+urlPort+\":\"+urlSID");
+ *//*
      }
 
      public Map getDataSource(String dbType){
@@ -99,48 +157,4 @@ public class QueryService {
              return  map;//返回数据库中的用户名和密码
          }
 
-     }
-
-     /**
-      * 获取表中数据
-      * @param tableName
-      * @return
-      */
-     public List<Map<String,Object>> getData(String tableName,String dbType){
-         return getMapper(dbType).getData(tableName);
-     }
-
-     /**
-     * 获取数据库中的表
-     * @return
-     */
-     public List<Map<String,Object>> getTables(String dbType){
-         return getMapper(dbType).getTables("usertest");
-     }
-
-    /* public List<String> getTables(String dbType){
-         return getMapper(dbType).getTables("usertest");
      }*/
-
-     public List<String> selectALlUser() throws Exception {
-          return mysqlMapper.selectAllUser();
-
-     }
-
-     private PooledDataSource getDatasource(String dbType) {
-         if(dbType.equals("mysql")){
-             return mysqlDataSource;
-         }
-         else
-             return null;
-     }
-
-     private MysqlMapper getMapper(String dbType){
-         if(dbType.equals("mysql")){
-             return mysqlMapper;
-         }
-         else
-             return null;
-     }
-
-}

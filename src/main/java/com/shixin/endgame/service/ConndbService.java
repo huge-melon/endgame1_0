@@ -39,11 +39,10 @@ public class ConndbService {
     private OracleConfig oracleConfig;
     private SqlSessionFactory mysqlSqlSessionFactory;
 
-    private static HashMap<String,String> dbDriver ;
+    private static HashMap<String,String> dbDriver = new HashMap<>() ;
     private static HashMap<String,SqlSessionFactory> dbSession=new HashMap<>();
 
-    public ConndbService(){
-        dbDriver=new HashMap<>();
+    public ConndbService() {
         dbDriver.put("MySQL","com.mysql.cj.jdbc.Driver");
         dbDriver.put("Oracle","oracle.jdbc.driver.OracleDriver");
     }

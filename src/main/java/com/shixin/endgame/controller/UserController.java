@@ -56,8 +56,6 @@ public class UserController {
     }*/
 
 
-
-
     // 添加数据库连接功能
     @GetMapping("/adddb")
     public boolean addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword) throws Exception {
@@ -68,48 +66,26 @@ public class UserController {
         dBinfo.setDbName(dbName);
         dBinfo.setUserName(userName);
         dBinfo.setUserPassword(userPassword);
-
         conndbService.setDataSource(dBinfo);
 
-        /*
-
-        System.out.println("***********"+dBinfo.toString());
-
-*//*        ConndbService conndbService=new ConndbService();
-
-
-        SqlSessionFactory sqlSessionFactory= conndbService.setDataSource(dBinfo);*//*
-        SqlSession session=sqlSessionFactory.openSession();
-
-        MysqlMapper mysqlMapper=session.getMapper(MysqlMapper.class);
-
-        System.out.println(mysqlMapper.getTables(dbName).toString());*/
-
         return true;
-
-
     }
-    @GetMapping("/gettable")
-    public List<Map<String,Object>> getTable(@RequestParam String dbType,@RequestParam String dbName){
 
+    //获取数据库中的表名
+    @GetMapping("/gettable")
+    public List<Map<String,Object>> getTable(@RequestParam String dbType,@RequestParam String dbName) {
         System.out.println("dbType:"+dbType);
         System.out.println("dbName:"+dbName);
-//这里应该写到Service层中
-        SqlSessionFactory sqlSessionFactory=conndbService.getSqlsessionFactory(dbType,dbName);
-        SqlSession session=sqlSessionFactory.openSession();
-        if(dbType.equals("MySQL")) {
-            MysqlMapper mysqlMapper=session.getMapper(MysqlMapper.class);
-            return mysqlMapper.getTables(dbName);
-        }
-        else if(dbType=="Oracle"){
+        //这里应该写到Service层中
+        return queryService.getTables(dbType,dbName, conndbService.getSqlsessionFactory(dbType,dbName));
 
-        }
-        else{
-            System.out.println("error");
-        }
-        return null;
+    }
+
+    @GetMapping("/showtabledata")
+    public List<Map<String,Object>> getTableData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName){
 
 
+        return queryService.getTableData(dbType,dbName,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
     }
 
 
