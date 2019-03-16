@@ -12,7 +12,10 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +61,7 @@ public class UserController {
 
     // 添加数据库连接功能
     @GetMapping("/adddb")
-    public boolean addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword) throws Exception {
+    public List<Map<String,Object>> addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword) throws Exception {
         DBinfo dBinfo=new DBinfo();
         dBinfo.setDbType(dbType);
         dBinfo.setDbUrl(dbUrl);
@@ -67,8 +70,8 @@ public class UserController {
         dBinfo.setUserName(userName);
         dBinfo.setUserPassword(userPassword);
         conndbService.setDataSource(dBinfo);
+        return queryService.getTables(dbType,dbName, conndbService.getSqlsessionFactory(dbType,dbName));
 
-        return true;
     }
 
     //获取数据库中的表名
@@ -81,11 +84,11 @@ public class UserController {
 
     }
 
+
+    //返回对应表中的信息
     @GetMapping("/showtabledata")
     public List<Map<String,Object>> getTableData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName){
-
-
-        return queryService.getTableData(dbType,dbName,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
+        return queryService.getTableData(dbType,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
     }
 
 
@@ -122,4 +125,17 @@ public class UserController {
         System.out.println("selectALL");
         return queryService.selectALlUser();
     }*/
+
+    @Configuration
+    public class CORSconfiguration extends WebMvcConfigurerAdapter
+    {
+        @Override
+        public void addCorsMappings(CorsRegistry registry){
+            registry
+                    .addMapping("/**")
+                    .allowedMethods("*")
+                    .allowedOrigins("*")
+                    .allowedHeaders("*");
+        }
+    }
 }

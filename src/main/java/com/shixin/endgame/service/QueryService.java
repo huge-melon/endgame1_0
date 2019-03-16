@@ -27,17 +27,25 @@ public class QueryService {
 
     private final Logger logger= LoggerFactory.getLogger(this.getClass());
 
-
-
-
-
      /**
       * 获取表中数据
       * @param tableName
+      * @param dbType
       * @return
       */
-     public List<Map<String,Object>> getTableData(String dbType ,String dbName,String tableName,SqlSessionFactory sqlSessionFactory){
-         return getMapper(dbType).getData(tableName);
+     public List<Map<String,Object>> getTableData(String dbType ,String tableName,SqlSessionFactory sqlSessionFactory){
+         SqlSession session=sqlSessionFactory.openSession();
+         if(dbType.equals("MySQL")){
+             MysqlMapper mysqlMapper= session.getMapper(MysqlMapper.class);
+             return mysqlMapper.getTableData(tableName);
+         }
+         else if(dbType.equals("Oracle")){
+
+         }
+         else{
+             System.out.println("error");
+         }
+         return null;
      }
 
      /**
@@ -59,7 +67,6 @@ public class QueryService {
          }
          return null;
      }
-
 
      public List<String> selectALlUser() throws Exception {
           return mysqlMapper.selectAllUser();
@@ -83,8 +90,6 @@ public class QueryService {
      }
 
 }
-
-
 
 /* *//**
  * 设置数据库的用户名和密码

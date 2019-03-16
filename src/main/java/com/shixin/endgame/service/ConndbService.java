@@ -48,7 +48,7 @@ public class ConndbService {
     }
 
 
-    public boolean setDataSource(DBinfo dBinfo) throws Exception {
+    public SqlSessionFactory setDataSource(DBinfo dBinfo) throws Exception {
 
 
         System.out.println("setDataSource:  "+dBinfo.toString());
@@ -59,13 +59,14 @@ public class ConndbService {
             PooledDataSource dataSource=mysqlConfig.mysqlDataSource();
             mysqlSqlSessionFactory=mysqlConfig.sqlSessionFactory(dataSource);
             dbSession.put(dBinfo.getDbType()+dBinfo.getDbName(),mysqlSqlSessionFactory);
+            return mysqlSqlSessionFactory;
         }
         else if(dBinfo.getDbType()=="Oracle"){
             oracleConfig=new OracleConfig(dBinfo);
         }
 
         System.out.println(dbSession.toString());
-        return  true;
+        return  null;
     }
 
     public SqlSessionFactory getSqlsessionFactory(String dbType,String dbName) {

@@ -9,8 +9,9 @@ import java.util.Map;
 public interface MysqlMapper {
     List<Map<String,Object>> getData(@Param("table_name") String tableName);
     List<Map<String ,Object>> getTables(@Param("db_name") String db_name);
-    //获取指定表中的数据，数据如何存储？
-    List<Map<String,Object>> getTableData(@Param("db_name") String db_name,@Param("table_name") String table_name);
+
+
+    List<Map<String,Object>> getTableData(@Param("table_name") String table_name);
 
 
     List<String>  selectAllUser() throws Exception ;
