@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class UserController {
 
     // 添加数据库连接功能
     @GetMapping("/adddb")
-    public List<Map<String,Object>> addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword) throws Exception {
+    public Map<String,Object> addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword) throws Exception {
         DBinfo dBinfo=new DBinfo();
         dBinfo.setDbType(dbType);
         dBinfo.setDbUrl(dbUrl);
@@ -70,25 +71,65 @@ public class UserController {
         dBinfo.setUserName(userName);
         dBinfo.setUserPassword(userPassword);
         conndbService.setDataSource(dBinfo);
-        return queryService.getTables(dbType,dbName, conndbService.getSqlsessionFactory(dbType,dbName));
+
+        HashMap<String,Object> addDBname = new HashMap<>() ;
+
+        addDBname.put("title",dbName);
+        addDBname.put("children",queryService.getTableName(dbType,dbName, conndbService.getSqlsessionFactory(dbType,dbName)));
+
+
+       /* List<Map<String,Object>> dbnameList = new ArrayList<>();
+        dbnameList.add(addDBname);*/
+
+        HashMap<String,Object> addDBtype= new HashMap<>();
+
+        addDBtype.put("title",dbType);
+        addDBtype.put("children",addDBname);
+        // 这边只传回数据库的类型
+
+
+       /* List<Map<String,Object>> dbtypeList = new ArrayList<>();
+        dbtypeList.add(addDBtype);*/
+
+      /*  HashMap<String,Object> sendtofront= new HashMap<>();
+        sendtofront.put("children",dbtypeList);
+
+        List<Map<String,Object>> sendtofrontList = new ArrayList<>();
+        sendtofrontList.add(sendtofront);*/
+
+        return addDBtype;
+
+        /**
+        * @Param  notice
+         * 将返回的json信息，加上数据库类型，数据库名，重新包装再返回
+         *
+         * 现在已经添加到前台，要是这个时候，从别处，修改了，数据表，应该怎么办
+         *      添加一个刷新的按钮
+        * */
 
     }
 
     //获取数据库中的表名
     @GetMapping("/gettable")
-    public List<Map<String,Object>> getTable(@RequestParam String dbType,@RequestParam String dbName) {
+    public List<Map<String,Object>> getTableName(@RequestParam String dbType,@RequestParam String dbName) {
         System.out.println("dbType:"+dbType);
         System.out.println("dbName:"+dbName);
         //这里应该写到Service层中
-        return queryService.getTables(dbType,dbName, conndbService.getSqlsessionFactory(dbType,dbName));
+        return queryService.getTableName(dbType,dbName, conndbService.getSqlsessionFactory(dbType,dbName));
 
     }
 
 
-    //返回对应表中的信息
-    @GetMapping("/showtabledata")
+    //返回对应表中的信息  gettabledata
+    @GetMapping("/gettabledata")
     public List<Map<String,Object>> getTableData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName){
         return queryService.getTableData(dbType,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
+}
+
+    //返回表中元数据 gettablemetadata
+    @GetMapping("/gettablemetadata")
+    public List<Map<String,Object>> getTableMetaData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName){
+        return queryService.getTableMetaData(dbType,dbName,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
     }
 
 

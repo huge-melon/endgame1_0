@@ -52,12 +52,11 @@ public class QueryService {
      * 获取数据库中的表
      * @return
      */
-     public List<Map<String,Object>> getTables(String dbType, String dbName,SqlSessionFactory sqlSessionFactory){
-
+     public List<Map<String,Object>> getTableName(String dbType, String dbName,SqlSessionFactory sqlSessionFactory){
          SqlSession session=sqlSessionFactory.openSession();
          if(dbType.equals("MySQL")) {
              MysqlMapper mysqlMapper=session.getMapper(MysqlMapper.class);
-             return mysqlMapper.getTables(dbName);
+             return mysqlMapper.getTableName(dbName);
          }
          else if(dbType=="Oracle"){
 
@@ -68,98 +67,19 @@ public class QueryService {
          return null;
      }
 
-     public List<String> selectALlUser() throws Exception {
-          return mysqlMapper.selectAllUser();
 
-     }
+    public List<Map<String,Object>> getTableMetaData(String dbType ,String dbName,String tableName,SqlSessionFactory sqlSessionFactory){
+        SqlSession session=sqlSessionFactory.openSession();
+        if(dbType.equals("MySQL")){
+            MysqlMapper mysqlMapper= session.getMapper(MysqlMapper.class);
+            return mysqlMapper.getTableMetaData(dbName,tableName);
+        }
+        else if(dbType.equals("Oracle")){
 
-     private PooledDataSource getDatasource(String dbType) {
-         if(dbType.equals("mysql")){
-             return mysqlDataSource;
-         }
-         else
-             return null;
-     }
-
-     private MysqlMapper getMapper(String dbType){
-         if(dbType.equals("mysql")){
-             return mysqlMapper;
-         }
-         else
-             return null;
-     }
-
+        }
+        else{
+            System.out.println("error");
+        }
+        return null;
+    }
 }
-
-/* *//**
- * 设置数据库的用户名和密码
- *
- * @param urlIP
- * @param urlPort
- * @param dbType
- * @param userName
- * @param passWord
- * @param urlSID
- * @return
- *//*
-
-     public boolean setDataSource(String dbType,String userName,String passWord,String urlIP,String urlPort,String urlSID){
-         PooledDataSource pooledDataSource=getDatasource(dbType);
-         pooledDataSource.setUsername(userName);
-         pooledDataSource.setPassword(passWord);
-         if(dbType.equals("mysql")){
-             pooledDataSource.setUrl("jdbc:mysql://"+urlIP+":"+urlPort+"/"+urlSID);
-             logger.debug(pooledDataSource.getUrl());
-             return true;
-         }
-         else
-             return false;
-
-         *//*
- *else if(dbType.equals("oracle"))
- * pooledDataSource.setUrl("jdbc:oracle:thin:@\"+urlIP+\":\"+urlPort+\":\"+urlSID");
- *//*
-     }
-
-     public Map getDataSource(String dbType){
-         PooledDataSource pooledDataSource=getDatasource(dbType);
-
-         Map map=new HashMap();
-         try {
-             String userName = pooledDataSource.getUsername();
-             String passWord = pooledDataSource.getPassword();
-             String urlPrimitive = pooledDataSource.getUrl();
-             if (dbType.equals("mysql")) {
-
-                 String[] url=urlPrimitive.split("//");//分割原始的url字符串
-                 String[] urlTemp=url[1].split(":");//分割剩余的ip部分的url
-                 String[] urlFinal=urlTemp[1].split("/");//mysql指定的数据库
-                 if (userName==null && passWord ==null &&url.length==2)
-                 {
-                     map.put("userName","");
-                     map.put("passWord","");
-                     map.put("urlIP","");//url中的ip地址
-                     map.put("urlPort","");//port
-                     map.put("urlSID","");//SID
-                 }
-                 else if (url.length>0&&urlFinal.length>0){
-                     map.put("userName",userName);
-                     map.put("passWord",passWord);
-                     map.put("urlIP",urlTemp[0]);//url中的ip地址
-                     map.put("urlPort",urlFinal[0]);//port
-                     map.put("urlSID",urlFinal[1]);//数据库名
-                 }
-
-             }
-             return map;//返回数据库中的用户名和密码
-         }  catch (NullPointerException e){
-             logger.error("username is null");
-             map.put("userName","");
-             map.put("passWord","");
-             map.put("urlIP","");//url中的ip地址
-             map.put("urlPort","");//port
-             map.put("urlSID","");//SID
-             return  map;//返回数据库中的用户名和密码
-         }
-
-     }*/

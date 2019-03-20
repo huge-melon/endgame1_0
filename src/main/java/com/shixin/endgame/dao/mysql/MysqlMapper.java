@@ -7,14 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 public interface MysqlMapper {
-    List<Map<String,Object>> getData(@Param("table_name") String tableName);
-    List<Map<String ,Object>> getTables(@Param("db_name") String db_name);
 
-
+    //获取数据库中的表名
+    List<Map<String ,Object>> getTableName(@Param("db_name") String db_name);
+    //获取表中的数据
     List<Map<String,Object>> getTableData(@Param("table_name") String table_name);
+    //获取表中的元数据
+    List<Map<String,Object>> getTableMetaData(@Param("db_name") String db_name, @Param("table_name") String table_name);
 
-
-    List<String>  selectAllUser() throws Exception ;
-    //查询所有数据
-    List<Map<String,Object>> getAlldate(@Param("table_name") String tableName);
 }
