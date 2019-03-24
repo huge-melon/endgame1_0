@@ -46,20 +46,6 @@ public class UserController {
     public UserController(){
 
     }
-
-
-    /*@PostMapping("/gettable")
-    public Map<String,Object> getTable(@RequestBody Map<String,String> paramMap){
-        String dbType=paramMap.getOrDefault("dbType","");
-       // dbType="mysql";
-        List<Map<String,Object>> result=queryService.getTables(dbType);
-        Map map=new HashMap();
-        map.put("data",result);
-        return map;
-
-    }*/
-
-
     // 添加数据库连接功能
     @GetMapping("/adddb")
     public Map<String,Object> addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword) throws Exception {
@@ -76,27 +62,10 @@ public class UserController {
 
         addDBname.put("title",dbName);
         addDBname.put("children",queryService.getTableName(dbType,dbName, conndbService.getSqlsessionFactory(dbType,dbName)));
-
-
-       /* List<Map<String,Object>> dbnameList = new ArrayList<>();
-        dbnameList.add(addDBname);*/
-
         HashMap<String,Object> addDBtype= new HashMap<>();
 
         addDBtype.put("title",dbType);
         addDBtype.put("children",addDBname);
-        // 这边只传回数据库的类型
-
-
-       /* List<Map<String,Object>> dbtypeList = new ArrayList<>();
-        dbtypeList.add(addDBtype);*/
-
-      /*  HashMap<String,Object> sendtofront= new HashMap<>();
-        sendtofront.put("children",dbtypeList);
-
-        List<Map<String,Object>> sendtofrontList = new ArrayList<>();
-        sendtofrontList.add(sendtofront);*/
-
         return addDBtype;
 
         /**
@@ -124,7 +93,7 @@ public class UserController {
     @GetMapping("/gettabledata")
     public List<Map<String,Object>> getTableData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName){
         return queryService.getTableData(dbType,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
-}
+    }
 
     //返回表中元数据 gettablemetadata
     @GetMapping("/gettablemetadata")
@@ -132,40 +101,13 @@ public class UserController {
         return queryService.getTableMetaData(dbType,dbName,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
     }
 
+    //http://localhost:8080/test/delDuplicatedData?dbType=MySQL&dbName=test1&tableName=users&columnsName=userName,user_sex,hometown&id=id
 
-/*
-    @RequestMapping("/mytest")
-    public List<Map<String,Object>> getTable1(){
-        String dbType="mysql";
-        List<Map<String,Object>> result=queryService.getTables(dbType);
-        Map map=new HashMap();
-        map.put("data",result);
-        return result;
+    //去除重复的数据
+    @GetMapping("/delDuplicatedData")
+    public boolean delDuplicatedData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnsName,@RequestParam String id){
+        return cleanService.delDuplicatedData(dbType,tableName,columnsName,id,conndbService.getSqlsessionFactory(dbType,dbName));
     }
-
-   *//* @RequestMapping("/gettable")
-    public List<String> getTable2(){
-        String dbType="mysql";
-        List<String> result=queryService.getTables(dbType);
-
-        for (String name:result
-             ) {
-            System.out.println(name);
-
-        }
-        return result;
-    }
-*//*
-    @RequestMapping("/hello")
-    public String Hello(){
-        return "Hello World1";
-    }
-
-    @RequestMapping("/selectall")
-    public  List<String> selectAll() throws Exception {
-        System.out.println("selectALL");
-        return queryService.selectALlUser();
-    }*/
 
     @Configuration
     public class CORSconfiguration extends WebMvcConfigurerAdapter
