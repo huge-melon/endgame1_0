@@ -108,6 +108,15 @@ public class UserController {
     public boolean delDuplicatedData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnsName,@RequestParam String id){
         return cleanService.delDuplicatedData(dbType,tableName,columnsName,id,conndbService.getSqlsessionFactory(dbType,dbName));
     }
+    @GetMapping("/delDataByNull")
+    public boolean delDataByNull(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnsName,@RequestParam String method){
+        return cleanService.delDataByNull(dbType,tableName,columnsName,method,conndbService.getSqlsessionFactory(dbType,dbName));
+    }
+
+    @GetMapping("/deleteTableColumn")
+    public boolean deleteTableColumn(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnName){
+            return cleanService.deleteTableColumn(dbType,tableName,columnName,conndbService.getSqlsessionFactory(dbType,dbName));
+    }
 
     @Configuration
     public class CORSconfiguration extends WebMvcConfigurerAdapter

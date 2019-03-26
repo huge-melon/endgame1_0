@@ -16,5 +16,10 @@ public interface MysqlMapper {
     List<Map<String,Object>> getTableMetaData(@Param("db_name") String db_name, @Param("table_name") String table_name);
     //去除重复数据
     void delDuplicatedData(@Param("table_name") String table_name,@Param("columns_name") String columns_name,@Param("pri_name") String pri_name,@Param("table_id") String table_id);
+    //删除缺失项
+    void delDataByNullAnd(@Param("table_name") String table_name,@Param("columns_name") List<String> columns_name);
+    void delDataByNullOr(@Param("table_name") String table_name,@Param("columns_name") List<String> columns_name);
+    //删除一列
+    void deleteTableColumn(@Param("table_name") String table_name,@Param("columns_name") String columns_name);
 
 }
