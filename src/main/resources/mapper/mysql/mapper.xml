@@ -60,5 +60,14 @@
         ALTER TABLE ${table_name}
         DROP COLUMN ${columns_name}
     </update>
+    <!--按条件删除行-->
+    <delete id="deleteByCondition">
+        delete from ${table_name} where
+        <foreach collection="conditionList" item="condition" separator=" and ">
+            ${condition}
+        </foreach>
+    </delete>
+
+
 
 </mapper>

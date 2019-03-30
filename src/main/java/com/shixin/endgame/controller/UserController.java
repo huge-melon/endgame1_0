@@ -1,8 +1,10 @@
 package com.shixin.endgame.controller;
 
 import com.shixin.endgame.config.MysqlConfig;
+import com.shixin.endgame.entity.ConditionTable;
 import com.shixin.endgame.entity.DBinfo;
 import com.shixin.endgame.dao.mysql.MysqlMapper;
+import com.shixin.endgame.entity.MapTable;
 import com.shixin.endgame.service.CleanService;
 import com.shixin.endgame.service.ConndbService;
 import com.shixin.endgame.service.QueryService;
@@ -116,6 +118,18 @@ public class UserController {
     @GetMapping("/deleteTableColumn")
     public boolean deleteTableColumn(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnName){
             return cleanService.deleteTableColumn(dbType,tableName,columnName,conndbService.getSqlsessionFactory(dbType,dbName));
+    }
+
+    @PostMapping("/deleteByCondition")
+    public boolean deleteByCondition(@RequestBody ConditionTable conditionTable){
+        System.out.println(conditionTable.toString());
+        return cleanService.deleteByCondition(conditionTable,conndbService.getSqlsessionFactory(conditionTable.getDbType(),conditionTable.getDbName()));
+    }
+
+    @PostMapping("/OK")
+    public boolean OK(@RequestParam String dbType,@RequestParam String dbName){
+        System.out.println("OK   "+dbType+"  "+dbName);
+        return true;
     }
 
     @Configuration

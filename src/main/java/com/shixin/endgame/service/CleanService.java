@@ -2,10 +2,14 @@ package com.shixin.endgame.service;
 //负责数据清洗
 
 import com.shixin.endgame.dao.mysql.MysqlMapper;
+import com.shixin.endgame.entity.ConditionTable;
+import com.shixin.endgame.entity.MapTable;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.stereotype.Service;
 
+import javax.swing.plaf.synth.SynthTextAreaUI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,6 +65,25 @@ public class CleanService {
             return true;
         }
         else if(dbType=="Oracle"){
+
+        }
+        else{
+            System.out.println("error");
+        }
+        return false;
+    }
+
+    public boolean deleteByCondition(ConditionTable conditionTable, SqlSessionFactory sqlSessionFactory){
+        SqlSession session=sqlSessionFactory.openSession();
+        if(conditionTable.getDbType().equals("MySQL")) {
+            MysqlMapper mysqlMapper=session.getMapper(MysqlMapper.class);
+
+            System.out.println(conditionTable.getConditions().toString());
+            mysqlMapper.deleteByCondition(conditionTable.getTableName(),conditionTable.getConditions());
+          //  mysqlMapper.deleteByCondition();
+            return true;
+        }
+        else if(conditionTable.getDbType().equals("Oracle")){
 
         }
         else{

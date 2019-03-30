@@ -21,5 +21,7 @@ public interface MysqlMapper {
     void delDataByNullOr(@Param("table_name") String table_name,@Param("columns_name") List<String> columns_name);
     //删除一列
     void deleteTableColumn(@Param("table_name") String table_name,@Param("columns_name") String columns_name);
+    //按条件删除
+    void deleteByCondition(@Param("table_name") String table_name, @Param("conditionList") List<String> conditionList);
 
 }
