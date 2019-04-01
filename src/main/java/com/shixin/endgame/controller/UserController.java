@@ -1,10 +1,12 @@
 package com.shixin.endgame.controller;
 
 import com.shixin.endgame.config.MysqlConfig;
+import com.shixin.endgame.dao.MongoDao;
 import com.shixin.endgame.entity.ConditionTable;
 import com.shixin.endgame.entity.DBinfo;
 import com.shixin.endgame.dao.mysql.MysqlMapper;
 import com.shixin.endgame.entity.MapTable;
+import com.shixin.endgame.entity.Runoob;
 import com.shixin.endgame.service.CleanService;
 import com.shixin.endgame.service.ConndbService;
 import com.shixin.endgame.service.QueryService;
@@ -15,14 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/test")
@@ -49,36 +49,43 @@ public class UserController {
 
     }
     // 添加数据库连接功能
-    @GetMapping("/adddb")
-    public Map<String,Object> addDatabse(@RequestParam String dbType,@RequestParam String dbUrl,@RequestParam String dbPort,@RequestParam String dbName,@RequestParam String userName,@RequestParam String userPassword) throws Exception {
-        DBinfo dBinfo=new DBinfo();
-        dBinfo.setDbType(dbType);
-        dBinfo.setDbUrl(dbUrl);
-        dBinfo.setDbPort(dbPort);
-        dBinfo.setDbName(dbName);
-        dBinfo.setUserName(userName);
-        dBinfo.setUserPassword(userPassword);
+    @PostMapping("/adddb")
+    public Map<String,Object> addDatabse(@RequestBody DBinfo dBinfo) throws Exception {
         conndbService.setDataSource(dBinfo);
-
         HashMap<String,Object> addDBname = new HashMap<>() ;
-
-        addDBname.put("title",dbName);
-        addDBname.put("children",queryService.getTableName(dbType,dbName, conndbService.getSqlsessionFactory(dbType,dbName)));
         HashMap<String,Object> addDBtype= new HashMap<>();
 
-        addDBtype.put("title",dbType);
+        if(dBinfo.getDbType().equals("MongoDB")){
+            MongoTemplate mongoTemplate = (MongoTemplate) conndbService.setDataSource(dBinfo);
+            MongoDao mongoDao = new MongoDao(mongoTemplate);
+          //  List data = mongoDao.findMongoData("runoob");
+            Set colsName = mongoDao.getTableName();
+            List<Map<String,Object>> collections = new ArrayList<>();
+            for (Object col: colsName) {
+                Map<String,Object> table =new HashMap<>();
+                table.put("TABLE_NAME",col);
+                collections.add(table);
+            }
+            addDBname.put("title",dBinfo.getDbName());
+            addDBname.put("children",collections);
+            addDBtype.put("title",dBinfo.getDbType());
+            addDBtype.put("children",addDBname);
+            return addDBtype;
+        }
+
+        addDBname.put("title",dBinfo.getDbName());
+        addDBname.put("children",queryService.getTableName(dBinfo.getDbType(),dBinfo.getDbName(), conndbService.getSqlsessionFactory(dBinfo.getDbType(),dBinfo.getDbName())));
+        addDBtype.put("title",dBinfo.getDbType());
         addDBtype.put("children",addDBname);
         return addDBtype;
-
         /**
         * @Param  notice
-         * 将返回的json信息，加上数据库类型，数据库名，重新包装再返回
-         *
-         * 现在已经添加到前台，要是这个时候，从别处，修改了，数据表，应该怎么办
          *      添加一个刷新的按钮
         * */
-
     }
+
+
+
 
     //获取数据库中的表名
     @GetMapping("/gettable")
@@ -94,7 +101,18 @@ public class UserController {
     //返回对应表中的信息  gettabledata
     @GetMapping("/gettabledata")
     public List<Map<String,Object>> getTableData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName){
-        return queryService.getTableData(dbType,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
+        if(dbType.equals("MongoDB")){
+            System.out.println("*************************************");
+            MongoTemplate mongoTemplate = (MongoTemplate) conndbService.getDbSessionMapping(dbType,dbName);
+            MongoDao mongoDao = new MongoDao(mongoTemplate);
+            List data = mongoDao.findMongoData(tableName);
+            System.out.println("getMongoDB:  "+data);
+
+            return data;
+
+        }
+        else
+            return queryService.getTableData(dbType,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
     }
 
     //返回表中元数据 gettablemetadata

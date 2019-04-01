@@ -67,8 +67,7 @@ public class QueryService {
          return null;
      }
 
-
-    public List<Map<String,Object>> getTableMetaData(String dbType ,String dbName,String tableName,SqlSessionFactory sqlSessionFactory){
+     public List<Map<String,Object>> getTableMetaData(String dbType ,String dbName,String tableName,SqlSessionFactory sqlSessionFactory){
         SqlSession session=sqlSessionFactory.openSession();
         if(dbType.equals("MySQL")){
             MysqlMapper mysqlMapper= session.getMapper(MysqlMapper.class);
