@@ -3,6 +3,7 @@ package com.shixin.endgame.service;
 import com.shixin.endgame.config.MonogoConfig;
 import com.shixin.endgame.config.MysqlConfig;
 import com.shixin.endgame.config.OracleConfig;
+import com.shixin.endgame.config.PostgreConfig;
 import com.shixin.endgame.entity.DBinfo;
 import com.shixin.endgame.dao.mysql.MysqlMapper;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
@@ -39,7 +40,10 @@ public class ConndbService {
 
     private MysqlConfig mysqlConfig;
     private OracleConfig oracleConfig;
-    private SqlSessionFactory mysqlSqlSessionFactory;
+    private PostgreConfig postgreConfig;
+
+    private SqlSessionFactory sqlSessionFactory;
+
     private MonogoConfig monogoConfig;
 
     private static HashMap<String,String> dbDriver = new HashMap<>() ;
@@ -61,12 +65,21 @@ public class ConndbService {
             System.out.println(12345);
             mysqlConfig=new MysqlConfig(dBinfo);
             PooledDataSource dataSource=mysqlConfig.mysqlDataSource();
-            mysqlSqlSessionFactory=mysqlConfig.sqlSessionFactory(dataSource);
-            dbSession.put(dBinfo.getDbType()+dBinfo.getDbName(),mysqlSqlSessionFactory);
-            return mysqlSqlSessionFactory;
+            sqlSessionFactory=mysqlConfig.sqlSessionFactory(dataSource);
+            dbSession.put(dBinfo.getDbType()+dBinfo.getDbName(),sqlSessionFactory);
+            return sqlSessionFactory;
         }
         else if(dBinfo.getDbType()=="Oracle"){
             oracleConfig=new OracleConfig(dBinfo);
+        }
+        else if(dBinfo.getDbType().equals("PostgreSQL")){
+            System.out.println("Connect to PostgreSQL");
+            postgreConfig = new PostgreConfig(dBinfo);
+            PooledDataSource dataSource = postgreConfig.postgreDataSource();
+            sqlSessionFactory = postgreConfig.sqlSessionFactory(dataSource);
+            dbSession.put(dBinfo.getDbType()+dBinfo.getDbName(),sqlSessionFactory);
+            return sqlSessionFactory;
+
         }
         else if(dBinfo.getDbType().equals("MongoDB")){
             System.out.println("mongoDB");

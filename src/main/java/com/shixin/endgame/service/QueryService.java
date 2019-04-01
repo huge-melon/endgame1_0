@@ -1,6 +1,7 @@
 package com.shixin.endgame.service;
 
 import com.shixin.endgame.dao.mysql.MysqlMapper;
+import com.shixin.endgame.dao.postgresql.PostgresqlMapper;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -39,8 +40,10 @@ public class QueryService {
              MysqlMapper mysqlMapper= session.getMapper(MysqlMapper.class);
              return mysqlMapper.getTableData(tableName);
          }
-         else if(dbType.equals("Oracle")){
-
+         else if(dbType.equals("PostgreSQL")){
+             System.out.println("获取表中数据");
+             PostgresqlMapper postgresqlMapper =session.getMapper(PostgresqlMapper.class);
+             return postgresqlMapper.getTableData(tableName);
          }
          else{
              System.out.println("error");
@@ -58,7 +61,10 @@ public class QueryService {
              MysqlMapper mysqlMapper=session.getMapper(MysqlMapper.class);
              return mysqlMapper.getTableName(dbName);
          }
-         else if(dbType=="Oracle"){
+         else if(dbType.equals("PostgreSQL")){
+             System.out.println("获取数据库中的表");
+             PostgresqlMapper postgresqlMapper =session.getMapper(PostgresqlMapper.class);
+             return postgresqlMapper.getTableName(dbName);
 
          }
          else{
@@ -67,13 +73,17 @@ public class QueryService {
          return null;
      }
 
+     //获取表中的元数据
      public List<Map<String,Object>> getTableMetaData(String dbType ,String dbName,String tableName,SqlSessionFactory sqlSessionFactory){
         SqlSession session=sqlSessionFactory.openSession();
         if(dbType.equals("MySQL")){
             MysqlMapper mysqlMapper= session.getMapper(MysqlMapper.class);
             return mysqlMapper.getTableMetaData(dbName,tableName);
         }
-        else if(dbType.equals("Oracle")){
+        else if(dbType.equals("PostgreSQL")){
+            System.out.println("获取表中的元数据");
+            PostgresqlMapper postgresqlMapper =session.getMapper(PostgresqlMapper.class);
+            return postgresqlMapper.getTableMetaData(dbName,tableName);
 
         }
         else{

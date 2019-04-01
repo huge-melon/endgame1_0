@@ -6,7 +6,6 @@ import com.shixin.endgame.entity.ConditionTable;
 import com.shixin.endgame.entity.DBinfo;
 import com.shixin.endgame.dao.mysql.MysqlMapper;
 import com.shixin.endgame.entity.MapTable;
-import com.shixin.endgame.entity.Runoob;
 import com.shixin.endgame.service.CleanService;
 import com.shixin.endgame.service.ConndbService;
 import com.shixin.endgame.service.QueryService;
