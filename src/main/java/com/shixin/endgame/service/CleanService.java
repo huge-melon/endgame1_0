@@ -20,6 +20,7 @@ public class CleanService {
     //删除缺失值
     //补全
     //采样
+    //Postgre没有合并
     public boolean delDuplicatedData(String dbType, String tableName, String columnsName,String id, SqlSessionFactory sqlSessionFactory){
         SqlSession session=sqlSessionFactory.openSession();
         if(dbType.equals("MySQL")) {

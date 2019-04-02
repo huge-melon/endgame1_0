@@ -9,9 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class QueryService {
@@ -43,7 +41,7 @@ public class QueryService {
          else if(dbType.equals("PostgreSQL")){
              System.out.println("获取表中数据");
              PostgresqlMapper postgresqlMapper =session.getMapper(PostgresqlMapper.class);
-             return postgresqlMapper.getTableData(tableName);
+             return postgresqlMapper.getTableData("\""+tableName+"\"");
          }
          else{
              System.out.println("error");
@@ -62,7 +60,7 @@ public class QueryService {
              return mysqlMapper.getTableName(dbName);
          }
          else if(dbType.equals("PostgreSQL")){
-             System.out.println("获取数据库中的表");
+             System.out.println("PostgreSQL获取数据库中的表");
              PostgresqlMapper postgresqlMapper =session.getMapper(PostgresqlMapper.class);
              return postgresqlMapper.getTableName(dbName);
 
@@ -83,7 +81,34 @@ public class QueryService {
         else if(dbType.equals("PostgreSQL")){
             System.out.println("获取表中的元数据");
             PostgresqlMapper postgresqlMapper =session.getMapper(PostgresqlMapper.class);
-            return postgresqlMapper.getTableMetaData(dbName,tableName);
+            List<Map<String,Object>> temp = postgresqlMapper.getTableMetaData(tableName);
+            List<Map<String,Object>> prikey = postgresqlMapper.getPriKey(tableName);
+            Set<Object> sob = new HashSet<>();
+            for (Map<String,Object> p: prikey) {
+                sob.add(p.get("COLUMN_KEY"));
+            }
+            System.out.println(sob.toString());
+            System.out.println(sob.contains("id"));
+            for (Map<String,Object> hp: temp) {
+                System.out.println(sob.contains(hp.get("COLUMN_NAME")));
+                if((boolean)hp.get("IS_NULLABLE")){
+                    hp.replace("IS_NULLABLE","NO");
+                }
+                else{
+                    hp.replace("IS_NULLABLE","YES");
+                }
+                if(!hp.containsKey("COLUMN_COMMENT")){
+                    hp.put("COLUMN_COMMENT","");
+                }
+                if(sob.contains(hp.get("COLUMN_NAME"))){
+                    hp.put("COLUMN_KEY","PRI");
+                }
+                else {
+                    hp.put("COLUMN_KEY","");
+                }
+            }
+
+            return temp;
 
         }
         else{

@@ -6,7 +6,7 @@
 
     <!--Oracle 获取所有表-->
     <select id="getTableName" resultType="java.util.Map">
-       SELECT table_name from information_schema.tables where table_schema= #{db_name}
+       SELECT table_name as "TABLE_NAME" from information_schema.tables where table_schema= 'public'
     </select>
 
     <!--如何指定数据库，不需要考虑指定数据库，到sql语句这一层时已经找到了数据库-->
@@ -18,7 +18,21 @@
 
     <!--获取表中的元数据-->
     <select id="getTableMetaData" resultType="java.util.Map">
-        select COLUMN_NAME,COLUMN_TYPE,COLUMN_KEY,IS_NULLABLE,COLUMN_COMMENT from information_schema.COLUMNS where TABLE_SCHEMA= #{db_name} and TABLE_NAME= #{table_name}
+        SELECT col_description(a.attrelid,a.attnum) as "COLUMN_COMMENT",pg_type.typname as "COLUMN_TYPE",a.attname as "COLUMN_NAME", a.attnotnull as "IS_NULLABLE"
+          FROM pg_class as c,pg_attribute as a inner join pg_type on pg_type.oid = a.atttypid
+          where c.relname = #{table_name} and a.attrelid = c.oid and a.attnum>0
+    </select>
+
+    <select id="getPriKey" resultType="java.util.Map">
+        select pg_attribute.attname as "COLUMN_KEY" from
+            pg_constraint  inner join pg_class
+            on pg_constraint.conrelid = pg_class.oid
+            inner join pg_attribute on pg_attribute.attrelid = pg_class.oid
+            and  pg_attribute.attnum = pg_constraint.conkey[1]
+            inner join pg_type on pg_type.oid = pg_attribute.atttypid
+            where pg_class.relname = #{table_name}
+            and pg_constraint.contype='p'
+
     </select>
 
 </mapper>

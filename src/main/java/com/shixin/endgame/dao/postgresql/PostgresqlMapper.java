@@ -12,5 +12,6 @@ public interface PostgresqlMapper {
     //获取表中的数据
     List<Map<String,Object>> getTableData(@Param("table_name") String table_name);
     //获取表中的元数据
-    List<Map<String,Object>> getTableMetaData(@Param("db_name") String db_name, @Param("table_name") String table_name);
+    List<Map<String,Object>> getTableMetaData(@Param("table_name") String table_name);
+    List<Map<String,Object>> getPriKey(@Param("table_name") String table_name);
 }
