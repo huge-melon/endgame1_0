@@ -25,7 +25,7 @@ public class MongoDao {
     public List<Map<String,Object>> getMetaData(String collectName){
         //MapReduceOptions options = MapReduceOptions.options();
         String map = "function() { for(var key in this){emit(key,{count: 1,type:typeof(this[key])});}}";
-        String reduce = "function(key,values){var total=0; for(var i in values){total+=values[i].count; }return {count:total,type:values[0].type};}";
+        String reduce = "function(key,values){var total=0; var typeSet = new Set();var types=\"\"; for(var i in values){ total+=values[i].count; typeSet.add(values[i].type); } for(var s of typeSet){ types=types+s+'  '; } return {count:total,type:types};}";
         //String finalize ="function (key, value) { return {count:NumberInt(value.count),type:value.type};}";
        // options.finalizeFunction(finalize);
 
