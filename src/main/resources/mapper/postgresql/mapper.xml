@@ -34,5 +34,29 @@
             and pg_constraint.contype='p'
 
     </select>
+    <!--删除表中重复数据,如果表没有主键该怎么办-->
+    <delete id="delDuplicatedData">
+        DELETE FROM ${table_name} WHERE ( ${columns_name} ) IN (
+	        SELECT ${columns_name} FROM
+		        ( SELECT ${columns_name} FROM ${table_name} GROUP BY ${columns_name} HAVING count( ${pri_name} ) > 1 ) AS tmp1 )
+	            AND ${table_id} NOT IN ( SELECT ${table_id} FROM
+	                ( SELECT min( ${table_id} ) ${table_id} FROM ${table_name} GROUP BY ${columns_name} HAVING count( ${pri_name} ) > 1 ) AS tmp2)
+    </delete>
 
+    <!--与条件删除表项为空的行and方法-->
+    <delete id="delDataByNullAnd">
+        delete from ${table_name} where
+        <foreach collection="columns_name" item="columns" separator=" is NULL and ">
+            ${columns}
+        </foreach>
+        is null
+    </delete>
+    <!--与条件删除表项为空的行or方法-->
+    <delete id="delDataByNullOr">
+        delete from ${table_name} where
+        <foreach collection="columns_name" item="columns" separator=" is NULL or ">
+            ${columns}
+        </foreach>
+        is null
+    </delete>
 </mapper>

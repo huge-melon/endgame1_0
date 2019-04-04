@@ -1,17 +1,13 @@
 package com.shixin.endgame.controller;
 
-import com.shixin.endgame.config.MysqlConfig;
-import com.shixin.endgame.dao.MongoDao;
+import com.shixin.endgame.dao.mongodb.MongoDao;
 import com.shixin.endgame.entity.ConditionTable;
 import com.shixin.endgame.entity.DBinfo;
-import com.shixin.endgame.dao.mysql.MysqlMapper;
-import com.shixin.endgame.entity.MapTable;
 import com.shixin.endgame.service.CleanService;
 import com.shixin.endgame.service.ConndbService;
 import com.shixin.endgame.service.QueryService;
 import com.shixin.endgame.service.StoreService;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,8 +101,12 @@ public class UserController {
             MongoTemplate mongoTemplate = (MongoTemplate) conndbService.getDbSessionMapping(dbType,dbName);
             MongoDao mongoDao = new MongoDao(mongoTemplate);
             List data = mongoDao.findMongoData(tableName);
-            System.out.println("getMongoDB:  "+data);
 
+            for(Iterator it = data.iterator();it.hasNext();){
+                HashMap<String,Object> o =(HashMap<String, Object>) it.next();
+                String id= o.get("_id").toString();
+                o.replace("_id",id);
+            }
             return data;
 
         }
@@ -114,10 +114,18 @@ public class UserController {
             return queryService.getTableData(dbType,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
     }
 
+
     //返回表中元数据 gettablemetadata
     @GetMapping("/gettablemetadata")
     public List<Map<String,Object>> getTableMetaData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName){
-        return queryService.getTableMetaData(dbType,dbName,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
+        if(dbType.equals("MongoDB")){
+            MongoTemplate mongoTemplate = (MongoTemplate) conndbService.getDbSessionMapping("MongoDB",dbName);
+            MongoDao mongoDao = new MongoDao(mongoTemplate);
+            return mongoDao.getMetaData(tableName);
+        }
+        else{
+            return queryService.getTableMetaData(dbType,dbName,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
+        }
     }
 
     //http://localhost:8080/test/delDuplicatedData?dbType=MySQL&dbName=test1&tableName=users&columnsName=userName,user_sex,hometown&id=id
@@ -148,6 +156,22 @@ public class UserController {
         System.out.println("OK   "+dbType+"  "+dbName);
         return true;
     }
+
+    @GetMapping("/mongoSearch")
+    public List<Map<String,Object>> searchByCondition(@RequestParam String dbName,@RequestParam String collectionName,@RequestParam String key_field,@RequestParam String operation,@RequestParam String keyWord){
+        System.out.println(dbName+" : "+collectionName+" : " + key_field+" : "+operation+" : "+key_field);
+        MongoTemplate mongoTemplate = (MongoTemplate) conndbService.getDbSessionMapping("MongoDB",dbName);
+        MongoDao mongoDao = new MongoDao(mongoTemplate);
+        List data = mongoDao.searchByCondition(collectionName,key_field,operation,keyWord);
+        for(Iterator it = data.iterator();it.hasNext();){
+            HashMap<String,Object> o =(HashMap<String, Object>) it.next();
+            String id= o.get("_id").toString();
+            o.replace("_id",id);
+        }
+        return data;
+    }
+
+
 
     @Configuration
     public class CORSconfiguration extends WebMvcConfigurerAdapter

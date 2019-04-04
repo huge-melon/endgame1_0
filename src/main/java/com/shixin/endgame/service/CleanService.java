@@ -2,8 +2,10 @@ package com.shixin.endgame.service;
 //负责数据清洗
 
 import com.shixin.endgame.dao.mysql.MysqlMapper;
+import com.shixin.endgame.dao.postgresql.PostgresqlMapper;
 import com.shixin.endgame.entity.ConditionTable;
 import com.shixin.endgame.entity.MapTable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.stereotype.Service;
@@ -29,8 +31,20 @@ public class CleanService {
             mysqlMapper.delDuplicatedData(tableName,columnsName,column,id);
             return true;
         }
-        else if(dbType=="Oracle"){
+        else if(dbType.equals("Oracle")){
 
+        }
+        else if(dbType.equals("PostgreSQL")){
+            PostgresqlMapper postgresqlMapper=session.getMapper(PostgresqlMapper.class);
+            tableName = "\""+tableName+"\"";
+            id = "\""+id+"\"";
+            String[] strs =columnsName.split(",");
+            for(int i=0;i< strs.length;i++){
+                strs[i]="\""+strs[i]+"\"";
+            }
+            String newColumnsName = StringUtils.join(strs,",");
+            postgresqlMapper.delDuplicatedData(tableName,newColumnsName,strs[0],id);
+            return true;
         }
         else{
             System.out.println("error");
@@ -49,8 +63,25 @@ public class CleanService {
                 mysqlMapper.delDataByNullOr(tableName,column);
             return true;
         }
-        else if(dbType=="Oracle"){
+        else if(dbType.equals("Oracle")){
 
+        }
+        else if(dbType.equals("PostgreSQL")){
+            PostgresqlMapper postgresqlMapper=session.getMapper(PostgresqlMapper.class);
+            tableName = "\""+tableName+"\"";
+            String[] strs =columnsName.split(",");
+            for(int i=0;i< strs.length;i++){
+                strs[i]="\""+strs[i]+"\"";
+            }
+            List<String> column = Arrays.asList(strs);
+/*
+            List<String> column = Arrays.asList(columnsName.split(","));
+*/
+            if(method.equals("and")) // 可用mybatis动态if
+                postgresqlMapper.delDataByNullAnd(tableName,column);
+            else
+                postgresqlMapper.delDataByNullOr(tableName,column);
+            return true;
         }
         else{
             System.out.println("error");
