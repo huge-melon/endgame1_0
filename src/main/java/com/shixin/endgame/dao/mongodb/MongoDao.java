@@ -45,6 +45,7 @@ public class MongoDao {
     public List<Map> findMongoData(String collectName){
         System.out.println("MongoDBDao:");
         System.out.println(mongoTemplate.findAll(Map.class));
+        System.out.println(mongoTemplate.findAll(Map.class,collectName));
         return mongoTemplate.findAll(Map.class,collectName);
     }
     //获取所有集合名

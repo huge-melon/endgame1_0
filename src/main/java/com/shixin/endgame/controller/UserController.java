@@ -107,6 +107,7 @@ public class UserController {
                 String id= o.get("_id").toString();
                 o.replace("_id",id);
             }
+            System.out.println("MongoGetTable: "+ data);
             return data;
 
         }
@@ -116,7 +117,7 @@ public class UserController {
 
 
     //返回表中元数据 gettablemetadata
-    @GetMapping("/gettablemetadata")
+    @GetMapping("/ ")
     public List<Map<String,Object>> getTableMetaData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName){
         if(dbType.equals("MongoDB")){
             MongoTemplate mongoTemplate = (MongoTemplate) conndbService.getDbSessionMapping("MongoDB",dbName);
