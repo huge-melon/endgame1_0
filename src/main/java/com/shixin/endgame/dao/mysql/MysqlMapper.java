@@ -24,4 +24,23 @@ public interface MysqlMapper {
     //按条件删除
     void deleteByCondition(@Param("table_name") String table_name, @Param("conditionList") List<String> conditionList);
 
+    //
+    void updateColumnType(@Param("table_name") String table_name,@Param("column_name") String column_name,@Param("column_type") String column_type);
+
+    List<Map<String,Object>> getColumnData(@Param("table_name") String table_name,@Param("column_name") String column_name,@Param("pri_key") String pri_key);
+    void setColumnData(@Param("table_name") String table_name,@Param("column_name") String column_name,@Param("column_value") String column_value,@Param("pri_key") String pri_key,@Param("pri_value") String pri_value);
+
+    Double getAverage(@Param("table_name") String table_name,@Param("column_name") String column_name);
+    //获得众数，有可能不是一个
+    List<Map<String,Object>> getMode(@Param("table_name") String table_name,@Param("column_name") String column_name);
+    //获得中位数
+    Double getMedian(@Param("table_name") String table_name,@Param("column_name") String column_name);
+    void completFiled(@Param("table_name") String table_name,@Param("column_name") String column_name,@Param("column_value") Double column_value);
+
+    List<Double> getColumnDouble(@Param("table_name") String table_name,@Param("column_name") String column_name);
+
+    List<Map<String,Object>> getUserDefineData(@Param("table_name") String table_name,@Param("column_name") String column_name);
+
+    void insertData(@Param("table_name") String table_name,@Param("column_name") String column_name,@Param("column_value") String column_value);
+
 }

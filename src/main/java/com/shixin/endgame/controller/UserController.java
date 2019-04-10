@@ -3,6 +3,7 @@ package com.shixin.endgame.controller;
 import com.shixin.endgame.dao.mongodb.MongoDao;
 import com.shixin.endgame.entity.ConditionTable;
 import com.shixin.endgame.entity.DBinfo;
+import com.shixin.endgame.entity.RegularRequest;
 import com.shixin.endgame.service.CleanService;
 import com.shixin.endgame.service.ConndbService;
 import com.shixin.endgame.service.QueryService;
@@ -117,7 +118,7 @@ public class UserController {
 
 
     //返回表中元数据 gettablemetadata
-    @GetMapping("/ ")
+    @GetMapping("/gettablemetadata")
     public List<Map<String,Object>> getTableMetaData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName){
         if(dbType.equals("MongoDB")){
             MongoTemplate mongoTemplate = (MongoTemplate) conndbService.getDbSessionMapping("MongoDB",dbName);
@@ -129,7 +130,6 @@ public class UserController {
         }
     }
 
-    //http://localhost:8080/test/delDuplicatedData?dbType=MySQL&dbName=test1&tableName=users&columnsName=userName,user_sex,hometown&id=id
 
     //去除重复的数据
     @GetMapping("/delDuplicatedData")
@@ -170,6 +170,70 @@ public class UserController {
             o.replace("_id",id);
         }
         return data;
+    }
+
+    @GetMapping("/updateColumnType")
+    public boolean updateColumnType(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String column,@RequestParam String oldType,@RequestParam String newType){
+        return cleanService.updateColumnType(dbType,tableName,column,oldType,newType,conndbService.getSqlsessionFactory(dbType,dbName));
+    }
+
+    @GetMapping("/cutString")
+    public boolean cutString(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnName,@RequestParam String priKey,@RequestParam String opType,@RequestParam String beginKey,@RequestParam String endKey){
+        return cleanService.cutString(dbType,tableName,columnName,priKey,opType,beginKey,endKey,conndbService.getSqlsessionFactory(dbType,dbName));
+    }
+
+    //补全字段
+    @GetMapping("/completFiled")
+    public boolean completFiled(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnName,@RequestParam String completType,@RequestParam String defaultValue){
+        return cleanService.completFiled(dbType,tableName,columnName,completType,defaultValue,conndbService.getSqlsessionFactory(dbType,dbName));
+    }
+
+   /* @GetMapping("/dataVerify")
+    public List<Map<String,Object>> dataVerify(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnName,@RequestParam String priKey,@RequestParam String regularExpress){
+        System.out.println("data+++ "+ regularExpress);
+        return cleanService.dataVerify(dbType,tableName,columnName,priKey,regularExpress,conndbService.getSqlsessionFactory(dbType,dbName));
+    }  */
+
+    @PostMapping("/dataVerify")
+    public List<Map<String,Object>> dataVerify(@RequestBody RegularRequest regularRequest){
+        System.out.println("data+++ "+ regularRequest);
+        return cleanService.dataVerify(regularRequest.getDbType(),regularRequest.getTableName(),regularRequest.getColumnName(),regularRequest.getPriKey(),regularRequest.getRegularExpress(),conndbService.getSqlsessionFactory(regularRequest.getDbType(),regularRequest.getDbName()));
+    }
+
+    @PostMapping("/replaceString")
+    public List<Map<String,Object>> replaceString(@RequestBody RegularRequest regularRequest){
+        return cleanService.replaceString(regularRequest.getDbType(),regularRequest.getTableName(),regularRequest.getColumnName(),regularRequest.getPriKey(),regularRequest.getRegularExpress(),regularRequest.getTargetString(),conndbService.getSqlsessionFactory(regularRequest.getDbType(),regularRequest.getDbName()));
+    }
+
+    @PostMapping("/saveUpdateDate")
+    public boolean saveUpdateDate(@RequestBody Map<String,Object> receiveData){
+        String dbType = (String)receiveData.get("dbType");
+        String dbName = (String)receiveData.get("dbName");
+        String tableName = (String)receiveData.get("tableName");
+        String columnName = (String)receiveData.get("columnName");
+        String priKey = (String)receiveData.get("priKey");
+        List<Map<String,Object>> data = (List<Map<String, Object>>) receiveData.get("data");
+        System.out.println(receiveData);
+
+        return cleanService.saveUpdateDate(dbType,tableName,columnName,priKey,data,conndbService.getSqlsessionFactory(dbType,dbName));
+
+    }
+
+    @PostMapping("/rdbToRdb")
+    public boolean rdbToRdb(@RequestBody Map<String,Object> receiveData){
+        boolean userDefine = (boolean)receiveData.get("userDefine");
+        String sourceDbType = (String)receiveData.get("sourceDbType");
+        String sourceDbName = (String)receiveData.get("sourceDbName");
+        String sourceTableName = (String)receiveData.get("sourceTableName");
+        List<String> sourceColumnList = (List<String>) receiveData.get("sourceColumnList");
+
+        String targetDbType = (String)receiveData.get("targetDbType");
+        String targetDbName = (String)receiveData.get("targetDbName");
+        String targetTableName = (String)receiveData.get("targetTableName");
+        List<String> targetColumnList = (List<String>) receiveData.get("targetColumnList");
+
+        return cleanService.rdbToRdb(userDefine,sourceDbType,sourceDbName,sourceTableName,sourceColumnList,targetDbType,targetDbName,targetTableName,targetColumnList,conndbService.getSqlsessionFactory(sourceDbType,sourceDbName),conndbService.getSqlsessionFactory(targetDbType,targetDbName));
+
     }
 
 

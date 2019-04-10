@@ -68,6 +68,60 @@
         </foreach>
     </delete>
 
+    <!--修改字段类型-->
+    <update id="updateColumnType">
+        ALTER TABLE ${table_name} MODIFY COLUMN ${column_name}  ${column_type}
+    </update>
 
+    <!--获取一列数据-->
+    <select id="getColumnData" resultType="java.util.Map">
+        select ${pri_key},${column_name} from ${table_name}
+    </select>
+    <!--剪切字符串-->
+    <update id="setColumnData">
+        update ${table_name} set ${column_name} = #{column_value} where ${pri_key} = #{pri_value}
+    </update>
 
+    <!--获得平均值-->
+    <select id="getAverage" resultType="java.lang.Double">
+        select AVG(${column_name}) from ${table_name}
+    </select>
+    <!--获得众数-->
+    <select id="getMode" resultType="java.util.Map">
+        select ${column_name},count(*) cnt
+        from ${table_name}
+        group by score
+        having count(*) >= (
+        select max(cnt) from (select count(*) cnt from ${table_name} group by ${column_name}) tmp
+        )
+    </select>
+
+    <select id="getColumnDouble" resultType="java.lang.Double">
+        select ${column_name} from ${table_name}
+    </select>
+
+    <!--获得中位数-->
+    <select id="getMedian" resultType="java.lang.Double">
+        select AVG(DISTINCT ${column_name} )
+        from (
+        select T1.${column_name} from ${table_name} T1,${table_name} T2
+        group by T1.${column_name}
+        having sum(case when T2.${column_name} >= T1.${column_name} then 1 else 0 end) >= count(*)/2
+        and sum(case when T2.${column_name} &lt;= T1.${column_name} then 1 else 0 end) >= count(*)/2
+        ) tmp
+
+    </select>
+    <!--补全-->
+    <update id="completFiled">
+        update ${table_name} set ${column_name} = #{column_value} where ${column_name} is NULL or ${column_name} = ""
+    </update>
+
+    <!--获得指定列的数据-->
+    <select id="getUserDefineData" resultType="java.util.Map">
+        select ${column_name} from ${table_name}
+    </select>
+
+    <insert id="insertData">
+        insert into ${table_name}(${column_name}) values(${column_value})
+    </insert>
 </mapper>
