@@ -221,7 +221,6 @@ public class UserController {
 
     @PostMapping("/rdbToRdb")
     public boolean rdbToRdb(@RequestBody Map<String,Object> receiveData){
-        boolean userDefine = (boolean)receiveData.get("userDefine");
         String sourceDbType = (String)receiveData.get("sourceDbType");
         String sourceDbName = (String)receiveData.get("sourceDbName");
         String sourceTableName = (String)receiveData.get("sourceTableName");
@@ -232,10 +231,22 @@ public class UserController {
         String targetTableName = (String)receiveData.get("targetTableName");
         List<String> targetColumnList = (List<String>) receiveData.get("targetColumnList");
 
-        return cleanService.rdbToRdb(userDefine,sourceDbType,sourceDbName,sourceTableName,sourceColumnList,targetDbType,targetDbName,targetTableName,targetColumnList,conndbService.getSqlsessionFactory(sourceDbType,sourceDbName),conndbService.getSqlsessionFactory(targetDbType,targetDbName));
+        return storeService.rdbToRdb(sourceDbType,sourceTableName,sourceColumnList,targetDbType,targetTableName,targetColumnList,conndbService.getSqlsessionFactory(sourceDbType,sourceDbName),conndbService.getSqlsessionFactory(targetDbType,targetDbName));
 
     }
 
+    @PostMapping("/rdbToMongo")
+    public boolean rdbToMongo(@RequestBody Map<String,Object> receiveData){
+        String sourceDbType = (String)receiveData.get("sourceDbType");
+        String sourceDbName = (String)receiveData.get("sourceDbName");
+        String sourceTableName = (String)receiveData.get("sourceTableName");
+        List<String> sourceColumnList = (List<String>) receiveData.get("sourceColumnList");
+
+        String targetDbType = (String)receiveData.get("targetDbType");
+        String targetDbName = (String)receiveData.get("targetDbName");
+        String targetCollectionName = (String)receiveData.get("targetCollectionName");
+        return storeService.rdbToMongo(sourceDbType,sourceTableName,sourceColumnList,targetCollectionName,conndbService.getSqlsessionFactory(sourceDbType,sourceDbName),(MongoTemplate) conndbService.getDbSessionMapping(targetDbType,targetDbName));
+    }
 
 
     @Configuration

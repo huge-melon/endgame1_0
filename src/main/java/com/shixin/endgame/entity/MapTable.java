@@ -1,9 +1,7 @@
 package com.shixin.endgame.entity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -100,20 +98,35 @@ public class MapTable {
         }
 */
 
-        List<Map<String,String>> origin =new ArrayList<>();
-        for(int i=0;i<20;i++){
-            HashMap<String,String> o = new HashMap<>();
-            o.put(String.valueOf(i),String.valueOf(i));
-            origin.add(o);
+      /*  SimpleDateFormat formatter = new SimpleDateFormat("YYYY-MMM-dd HH:mm:ss:SSS");
+        String formatStr =formatter.format(new Date());
+        System.out.println(formatStr);//2017-九月-15 13:17:08:355
+
+        SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM -dd HH:mm:ss:SSS");
+        String formatStr2 =formatter2.format(new Date());
+        System.out.println(formatStr2);//2017-09-15 13:18:44:672*/
+
+        List<String> condtionList = new ArrayList<>();
+        condtionList.add("aaa");
+        condtionList.add("bbb");
+        condtionList.add("ccc");
+        condtionList.add("ddd");
+        condtionList.add("eee");
+        condtionList.add("fff");
+        condtionList.add("ggg");
+        List<String> afterModify = new ArrayList<>();
+        for (String  con: condtionList) {
+            con = con+"111";
+
+            //afterModify.add(con);
         }
-        System.out.println(origin);
+        System.out.println(condtionList);
 
-        for(Map<String,String> mp : origin){
-            mp.put("b","233");
-        }
-        System.out.println(origin);
-
-
+        String n = "0123456789";
+        int pos = n.indexOf('5');
+        System.out.println("pos:  "+ pos);
+        System.out.println(n.substring(0,pos));
+        System.out.println(n.substring(pos,n.length()));
 
         return;
     }

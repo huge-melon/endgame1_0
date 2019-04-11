@@ -59,4 +59,80 @@
         </foreach>
         is null
     </delete>
+
+    <!--删除一列数据-->
+    <update id="deleteTableColumn">
+        ALTER TABLE "${table_name}"
+        DROP COLUMN "${columns_name}"
+    </update>
+
+    <!--按条件删除行-->
+    <delete id="deleteByCondition">
+        delete from "${table_name}" where
+        <foreach collection="conditionList" item="condition" separator=" and ">
+            ${condition}
+        </foreach>
+    </delete>
+
+    <!--修改字段类型-->
+    <update id="updateColumnType">
+      alter table "${table_name}" alter  COLUMN "${column_name}" TYPE ${column_type} using "${column_name}"::${column_type};
+    </update>
+
+    <!--获取一列数据-->
+    <select id="getColumnData" resultType="java.util.Map">
+        select "${pri_key}","${column_name}" from "${table_name}"
+    </select>
+    <!--剪切字符串-->
+    <update id="setColumnData">
+        update "${table_name}" set "${column_name}" = #{column_value} where "${pri_key}" = ${pri_value}
+    </update>
+
+    <!--获得平均值-->
+    <select id="getAverage" resultType="java.lang.Double">
+        select AVG("${column_name}") from "${table_name}"
+    </select>
+    <!--获得众数-->
+    <select id="getMode" resultType="java.util.Map">
+        select "${column_name}",count(*) cnt
+        from "${table_name}"
+        group by score
+        having count(*) >= (
+        select max(cnt) from (select count(*) cnt from "${table_name}" group by "${column_name}") tmp
+        )
+    </select>
+
+    <!--获取一列数值-->
+    <select id="getColumnDouble" resultType="java.lang.Double">
+        select "${column_name}" from "${table_name}"
+    </select>
+
+    <!--获得中位数-->
+    <select id="getMedian" resultType="java.lang.Double">
+        select AVG(DISTINCT ${column_name} )
+        from (
+        select T1.${column_name} from ${table_name} T1,${table_name} T2
+        group by T1.${column_name}
+        having sum(case when T2.${column_name} >= T1.${column_name} then 1 else 0 end) >= count(*)/2
+        and sum(case when T2.${column_name} &lt;= T1.${column_name} then 1 else 0 end) >= count(*)/2
+        ) tmp
+
+    </select>
+    <!--补全-->
+    <update id="completFiled">
+        update "${table_name}" set "${column_name}" = ${column_value} where "${column_name}" is NULL
+    </update>
+
+    <!--获得指定列的数据-->
+    <select id="getUserDefineData" resultType="java.util.Map">
+        select
+        <foreach collection="columns_name" item="column_name" separator=",">"${column_name}"</foreach>
+        from "${table_name}"
+    </select>
+
+    <insert id="insertData">
+        insert into "${table_name}"(
+        <foreach collection="columns_name" item="column_name" separator=",">"${column_name}"</foreach>
+        ) values(${column_value})
+    </insert>
 </mapper>

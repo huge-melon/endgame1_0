@@ -1,5 +1,7 @@
 package com.shixin.endgame.dao.mongodb;
 
+import com.alibaba.fastjson.JSON;
+import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapreduce.MapReduceOptions;
 import org.springframework.data.mongodb.core.mapreduce.MapReduceResults;
@@ -83,4 +85,17 @@ public class MongoDao {
         return mongoTemplate.find(query,Map.class,collectName);
     }
 
+
+    //插入数据
+    public boolean insertData(String collectionName,List<Map<String,Object>> data){
+        for (Map<String,Object> mp:data) {
+            if(mp == null){
+                continue;
+            }
+            String line = JSON.toJSONString(mp);
+            Document doc = Document.parse(line);
+            mongoTemplate.insert(doc, collectionName);
+        }
+        return true;
+    }
 }

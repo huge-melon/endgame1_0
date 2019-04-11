@@ -96,6 +96,7 @@
         )
     </select>
 
+    <!--获取一列数值-->
     <select id="getColumnDouble" resultType="java.lang.Double">
         select ${column_name} from ${table_name}
     </select>
@@ -118,10 +119,10 @@
 
     <!--获得指定列的数据-->
     <select id="getUserDefineData" resultType="java.util.Map">
-        select ${column_name} from ${table_name}
+        select <foreach collection="columns_name" item="column_name" separator=",">${column_name}</foreach> from ${table_name}
     </select>
 
     <insert id="insertData">
-        insert into ${table_name}(${column_name}) values(${column_value})
+        insert into ${table_name}( <foreach collection="columns_name" item="column_name" separator=",">${column_name}</foreach>) values(${column_value})
     </insert>
 </mapper>
