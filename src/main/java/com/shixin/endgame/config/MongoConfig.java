@@ -3,21 +3,21 @@ package com.shixin.endgame.config;
 import com.mongodb.MongoClientURI;
 import com.shixin.endgame.entity.DBinfo;
 import com.shixin.endgame.entity.MongoConnect;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 
-public class MonogoConfig {
-    private MongoConnect mongoConnect;
+@Configuration
+public class MongoConfig {
 
-    private DBinfo dBinfo;
+    //private DBinfo dBinfo;
 
-    public MonogoConfig(DBinfo dBinfo){
+/*    public MonogoConfig(DBinfo dBinfo){
         this.dBinfo = dBinfo;
-    }
-
-
-    public MongoDbFactory mongoDbFactory(){
+    }*/
+    public MongoDbFactory mongoDbFactory(DBinfo dBinfo){
         String url = "mongodb://" +dBinfo.getDbUrl() + "/" +dBinfo.getDbName(); //+ dBinfo.getUserName() + ":" + dBinfo.getUserPassword()+ "@"
         System.out.println("MongoDB" + url);
         MongoClientURI mongoClientURI = new MongoClientURI(url);
@@ -26,8 +26,8 @@ public class MonogoConfig {
         return mongoDbFactory;
     }
 
-    public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory){
+/*    public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory){
         MongoTemplate mongo = new MongoTemplate(mongoDbFactory);
         return mongo;
-    }
+    }*/
 }

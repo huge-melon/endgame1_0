@@ -1,6 +1,7 @@
 package com.shixin.endgame.service;
 //负责数据清洗
 
+import com.shixin.endgame.dao.mongodb.MongoDao;
 import com.shixin.endgame.dao.mysql.MysqlMapper;
 import com.shixin.endgame.dao.postgresql.PostgresqlMapper;
 import com.shixin.endgame.entity.ConditionTable;
@@ -8,6 +9,7 @@ import com.shixin.endgame.entity.MapTable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.stereotype.Service;
 
 import javax.swing.plaf.synth.SynthTextAreaUI;
@@ -19,25 +21,35 @@ public class CleanService {
 
     private MysqlMapper mysqlMapper;
     private PostgresqlMapper postgresqlMapper;
+    private MongoDao mongoDao;
 
-    public boolean delDuplicatedData(String dbType, String tableName, String columnsName,String id, SqlSessionFactory sqlSessionFactory){
-        SqlSession session=sqlSessionFactory.openSession();
+    public boolean delDuplicatedData(String dbType, String tableName, String columnsName,String id, Object dbConnect){
+
         if(dbType.equals("MySQL")) {
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             mysqlMapper=session.getMapper(MysqlMapper.class);
             String column = columnsName.split(",")[0];
             mysqlMapper.delDuplicatedData(tableName,columnsName,column,id);
             return true;
         }
         else if(dbType.equals("PostgreSQL")){
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             postgresqlMapper=session.getMapper(PostgresqlMapper.class);
-            tableName = "\""+tableName+"\"";
-            id = "\""+id+"\"";
             String[] strs =columnsName.split(",");
             for(int i=0;i< strs.length;i++){
                 strs[i]="\""+strs[i]+"\"";
             }
             String newColumnsName = StringUtils.join(strs,",");
             postgresqlMapper.delDuplicatedData(tableName,newColumnsName,strs[0],id);
+            return true;
+        }
+        else if(dbType.equals("MongoDB")){
+            MongoDbFactory mongoDbFactory = (MongoDbFactory) dbConnect;
+            mongoDao = new MongoDao(mongoDbFactory);
+            List<String> keysName = Arrays.asList(columnsName.split(","));
+            mongoDao.delDuplicatedData(tableName,keysName);
             return true;
         }
         else{
@@ -47,9 +59,10 @@ public class CleanService {
     }
 
     //删除缺失项
-    public boolean delDataByNull(String dbType, String tableName, String columnsName,String method, SqlSessionFactory sqlSessionFactory){
-        SqlSession session=sqlSessionFactory.openSession();
+    public boolean delDataByNull(String dbType, String tableName, String columnsName,String method, Object dbConnect){
         if(dbType.equals("MySQL")) {
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             mysqlMapper=session.getMapper(MysqlMapper.class);
             List<String> column = Arrays.asList(columnsName.split(","));
             if(method.equals("and")) // 可用mybatis动态if
@@ -59,20 +72,21 @@ public class CleanService {
             return true;
         }
         else if(dbType.equals("PostgreSQL")){
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             postgresqlMapper=session.getMapper(PostgresqlMapper.class);
-            tableName = "\""+tableName+"\"";
-            String[] strs =columnsName.split(",");
-            for(int i=0;i< strs.length;i++){
-                strs[i]="\""+strs[i]+"\"";
-            }
-            List<String> column = Arrays.asList(strs);
-/*
             List<String> column = Arrays.asList(columnsName.split(","));
-*/
             if(method.equals("and")) // 可用mybatis动态if
                 postgresqlMapper.delDataByNullAnd(tableName,column);
             else
                 postgresqlMapper.delDataByNullOr(tableName,column);
+            return true;
+        }
+        else if(dbType.equals("MongoDB")){
+            MongoDbFactory mongoDbFactory = (MongoDbFactory) dbConnect;
+            mongoDao = new MongoDao(mongoDbFactory);
+            List<String> keysName = Arrays.asList(columnsName.split(","));
+            mongoDao.delDataByNull(tableName,method,keysName);
             return true;
         }
         else{
@@ -82,17 +96,25 @@ public class CleanService {
     }
 
     //删除一列数据
-    public boolean deleteTableColumn(String dbType,String tableName,String columnName,SqlSessionFactory sqlSessionFactory){
-        SqlSession session=sqlSessionFactory.openSession();
+    public boolean deleteTableColumn(String dbType,String tableName,String columnName,Object dbConnect){
         if(dbType.equals("MySQL")) {
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             mysqlMapper=session.getMapper(MysqlMapper.class);
             mysqlMapper.deleteTableColumn(tableName,columnName);
             return true;
         }
         else if(dbType.equals("PostgreSQL")){
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             postgresqlMapper = session.getMapper(PostgresqlMapper.class);
             postgresqlMapper.deleteTableColumn(tableName,columnName);
             return true;
+        }
+        else if(dbType.equals("MongoDB")){
+            MongoDbFactory mongoDbFactory = (MongoDbFactory) dbConnect;
+            mongoDao = new MongoDao(mongoDbFactory);
+            return mongoDao.deleteKey(tableName,columnName);
         }
         else{
             System.out.println("error");
@@ -101,15 +123,18 @@ public class CleanService {
     }
 
     //按条件删除一列数据
-    public boolean deleteByCondition(ConditionTable conditionTable, SqlSessionFactory sqlSessionFactory){
-        SqlSession session=sqlSessionFactory.openSession();
+    public boolean deleteByCondition(ConditionTable conditionTable, Object dbConnect){
         if(conditionTable.getDbType().equals("MySQL")) {
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             mysqlMapper=session.getMapper(MysqlMapper.class);
             System.out.println(conditionTable.getConditions().toString());
             mysqlMapper.deleteByCondition(conditionTable.getTableName(),conditionTable.getConditions());
             return true;
         }
         else if(conditionTable.getDbType().equals("PostgreSQL")){
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             postgresqlMapper = session.getMapper(PostgresqlMapper.class);
             List<String> condtionList = conditionTable.getConditions();
             List<String> afterModify = new ArrayList<>();
@@ -124,16 +149,34 @@ public class CleanService {
             postgresqlMapper.deleteByCondition(conditionTable.getTableName(),afterModify);
             return true;
         }
+        else if(conditionTable.getDbType().equals("MongoDB")){
+            MongoDbFactory mongoDbFactory = (MongoDbFactory) dbConnect;
+            mongoDao = new MongoDao(mongoDbFactory);
+            List<String> condtionList = conditionTable.getConditions();
+            List<Map<String,String>> conMap = new ArrayList<>();
+            for (String con : condtionList){
+                String[] strs = con.split(" ");
+                System.out.println(strs);
+                Map<String,String> map = new HashMap<>();
+                map.put("keyName",strs[0]);
+                map.put("op",strs[1]);
+                map.put("value",strs[2]);
+                conMap.add(map);
+            }
+            mongoDao.deleteByCondition(conditionTable.getTableName(),conMap);
+            return true;
+        }
         else{
             System.out.println("error");
         }
         return false;
     }
 
-    //修改字段类型
-    public boolean updateColumnType(String dbType, String tableName, String column, String oldType, String newType, SqlSessionFactory sqlSessionFactory){
-        SqlSession session=sqlSessionFactory.openSession();
+    //修改字段类型  没有MongoDB
+    public boolean updateColumnType(String dbType, String tableName, String column, String oldType, String newType, Object dbConnect){
         if (dbType.equals("MySQL")){
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             mysqlMapper=session.getMapper(MysqlMapper.class);
             /*
             *
@@ -146,6 +189,8 @@ public class CleanService {
 
         }
         else if(dbType.equals("PostgreSQL")){
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             postgresqlMapper=session.getMapper(PostgresqlMapper.class);
             postgresqlMapper.updateColumnType(tableName,column,newType);
             //不同类型有不同的长度，搞成输入式的不搞这种选择的。
@@ -153,33 +198,57 @@ public class CleanService {
 
         }
         else if(dbType.equals("MongoDB")){
-
-        }else{
+            MongoDbFactory mongoDbFactory = (MongoDbFactory) dbConnect;
+            mongoDao = new MongoDao(mongoDbFactory);
+        }
+        else{
             System.out.println("error");
         }
         return false;
     }
 
+
     //剪切字符串
-    public boolean cutString(String dbType, String tableName, String columnName, String priKey,String opType,String beginKey,String endKey,SqlSessionFactory sqlSessionFactory){
-        SqlSession session = sqlSessionFactory.openSession();
+    public boolean cutString(String dbType, String tableName, String columnName, String priKey,String opType,String beginKey,String endKey,Object dbConnect){
         List<Map<String,Object>> columnData=null;
 
         if (dbType.equals("MySQL")) {
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             mysqlMapper = session.getMapper(MysqlMapper.class);
             columnData = mysqlMapper.getColumnData(tableName, columnName, priKey);
         }
         else if(dbType.equals("PostgreSQL")) {
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             postgresqlMapper=session.getMapper(PostgresqlMapper.class);
             columnData= postgresqlMapper.getColumnData(tableName,columnName,priKey);
+        }else if(dbType.equals("MongoDB")){
+            MongoDbFactory mongoDbFactory = (MongoDbFactory) dbConnect;
+            mongoDao = new MongoDao(mongoDbFactory);
+            columnData = mongoDao.getDataByKey(tableName,columnName);
         }
+        else {
+            return false;
+        }
+
+
         System.out.println("columnData:   "+columnData);
         if(opType.equals("pos")){
             for (Map<String,Object> mo:columnData) {
                 if(mo.containsKey(columnName)){
                     String str = (String)mo.get(columnName);
-                    int begin = Integer.parseInt(beginKey)>str.length()?0:Integer.parseInt(beginKey);
-                    int end = Integer.parseInt(endKey)>str.length()?str.length():Integer.parseInt(endKey);
+
+                    int begin = Integer.parseInt(beginKey);
+                    if (begin >str.length()||begin < 0){
+                        begin = 0 ;
+                        System.out.println("起始位置超出范围");
+                    }
+                    int end = Integer.parseInt(endKey);
+                    if(end > str.length() || end< 0){
+                        end = str.length();
+                        System.out.println("结束位置超出范围");
+                    }
                     mo.replace(columnName,str.substring(begin, end));
                 }
             }
@@ -190,7 +259,7 @@ public class CleanService {
                     String str = (String)mo.get(columnName);
                     int begin = str.indexOf(beginKey)==-1?0:str.indexOf(beginKey);
                     int end = str.lastIndexOf(endKey)==-1?str.length():str.indexOf(endKey);
-                    mo.replace(columnName,str.substring(begin, end));
+                    mo.replace(columnName,str.substring(begin + beginKey.length(), end));
                 }
             }
         }
@@ -211,14 +280,25 @@ public class CleanService {
             }
             return true;
         }
+        else if(dbType.equals("MongoDB")){
+            //只有包含才替换
+            for (Map<String,Object> mo:columnData) {
+                if(mo.containsKey(columnName)) {
+                    mongoDao.setDataByKey(tableName,columnName,(String) mo.get(columnName),(String) mo.get("_id"));
+                }
+            }
+
+            return true;
+        }
         return false;
     }
 
     //字段补全
-    public boolean completFiled(String dbType, String tableName, String columnName, String completType, String defaultValue, SqlSessionFactory sqlSessionFactory) {
-        SqlSession session = sqlSessionFactory.openSession();
+    public boolean completFiled(String dbType, String tableName, String columnName, String completType, String defaultValue, Object dbConnect) {
         Double compleValue;
         if (dbType.equals("MySQL")){
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             mysqlMapper=session.getMapper(MysqlMapper.class);
             if(completType.equals("average")){
                 compleValue=mysqlMapper.getAverage(tableName,columnName);
@@ -258,6 +338,8 @@ public class CleanService {
             return true;
         }
         else if(dbType.equals("PostgreSQL")){
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             postgresqlMapper=session.getMapper(PostgresqlMapper.class);
             if(completType.equals("average")){
                 compleValue=postgresqlMapper.getAverage(tableName,columnName);
@@ -298,6 +380,26 @@ public class CleanService {
 
         }
         else if(dbType.equals("MongoDB")){
+            MongoDbFactory mongoDbFactory = (MongoDbFactory) dbConnect;
+            MongoDao mongoDao = new MongoDao(mongoDbFactory);
+
+            if(completType.equals("average")){
+                List<Double> data= mongoDao.getDataByKey(tableName,columnName);
+                Double sum=0.0;
+                for(Double num:data){
+                    sum+=num;
+                }
+                compleValue = sum/data.size();
+            }else if(completType.equals("mode")){
+
+
+            }else if(completType.equals("median")){
+
+            }else {
+
+            }
+            mysqlMapper.completFiled(tableName,columnName,compleValue);
+            return true;
 
         }else{
             System.out.println("error");
@@ -307,20 +409,25 @@ public class CleanService {
 
 
     //校验数据类型
-    public List<Map<String,Object>> dataVerify(String dbType, String tableName, String columnName,String priKey ,String regularExpress,SqlSessionFactory sqlSessionFactory){
-        SqlSession session = sqlSessionFactory.openSession();
+    public List<Map<String,Object>> dataVerify(String dbType, String tableName, String columnName,String priKey ,String regularExpress, Object dbConnect){
         List<Map<String,Object>> origin= null;
         List<Map<String,Object>> notMatchList = new ArrayList<>();
 
         if (dbType.equals("MySQL")) {
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             mysqlMapper = session.getMapper(MysqlMapper.class);
             origin = mysqlMapper.getColumnData(tableName, columnName, priKey);
         }
         else if(dbType.equals("PostgreSQL")) {
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             postgresqlMapper = session.getMapper(PostgresqlMapper.class);
             origin = postgresqlMapper.getColumnData(tableName, columnName, priKey);
         }else if(dbType.equals("MongoDB")){
-
+            MongoDbFactory mongoDbFactory = (MongoDbFactory) dbConnect;
+            mongoDao = new MongoDao(mongoDbFactory);
+            origin = mongoDao.getDataByKey(tableName,columnName);
         }else{
             System.out.println("error");
             return null;
@@ -343,9 +450,10 @@ public class CleanService {
         return notMatchList;
     }
 
-    public boolean saveUpdateDate(String dbType, String tableName, String columnName, String priKey, List<Map<String, Object>> data, SqlSessionFactory sqlSessionFactory) {
-        SqlSession session = sqlSessionFactory.openSession();
+    public boolean saveUpdateDate(String dbType, String tableName, String columnName, String priKey, List<Map<String, Object>> data, Object dbConnect ) {
         if (dbType.equals("MySQL")){
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             mysqlMapper=session.getMapper(MysqlMapper.class);
             for (Map<String,Object> mp : data) {
                 if(mp.get("targetdata")!=null){
@@ -355,6 +463,8 @@ public class CleanService {
             return true;
         }
         else if(dbType.equals("PostgreSQL")){
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             postgresqlMapper=session.getMapper(PostgresqlMapper.class);
             for (Map<String,Object> mp : data) {
                 if(mp.get("targetdata")!=null){
@@ -364,6 +474,15 @@ public class CleanService {
             return true;
         }
         else if(dbType.equals("MongoDB")){
+            MongoDbFactory mongoDbFactory = (MongoDbFactory) dbConnect;
+            mongoDao = new MongoDao(mongoDbFactory);
+            for (Map<String,Object> mp : data) {
+                if(mp.get("targetdata")!=null){
+                    mongoDao.setDataByKey(tableName,columnName,mp.get("targetdata").toString(),mp.get("id").toString());
+                }
+            }
+            return true;
+
 
         }else{
             System.out.println("error");
@@ -372,20 +491,25 @@ public class CleanService {
 
     }
 
-    public List<Map<String, Object>> replaceString(String dbType, String tableName, String columnName, String priKey, String regularExpress, String targetString, SqlSessionFactory sqlSessionFactory) {
-        SqlSession session = sqlSessionFactory.openSession();
+    public List<Map<String, Object>> replaceString(String dbType, String tableName, String columnName, String priKey, String regularExpress, String targetString, Object dbConnect) {
         List<Map<String,Object>> origin = null;
         if (dbType.equals("MySQL")) {
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             mysqlMapper = session.getMapper(MysqlMapper.class);
             //原始数据
             origin = mysqlMapper.getColumnData(tableName, columnName, priKey);
         }
         else if(dbType.equals("PostgreSQL")){
+            SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
+            SqlSession session=sqlSessionFactory.openSession();
             postgresqlMapper=session.getMapper(PostgresqlMapper.class);
             origin = postgresqlMapper.getColumnData(tableName, columnName, priKey);
         }
         else if(dbType.equals("MongoDB")){
-            return null;
+            MongoDbFactory mongoDbFactory = (MongoDbFactory) dbConnect;
+            mongoDao = new MongoDao(mongoDbFactory);
+            origin = mongoDao.getDataByKey(tableName,columnName);
         }else{
             System.out.println("error");
             return null;

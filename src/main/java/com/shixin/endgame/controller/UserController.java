@@ -9,10 +9,12 @@ import com.shixin.endgame.service.ConndbService;
 import com.shixin.endgame.service.QueryService;
 import com.shixin.endgame.service.StoreService;
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -51,26 +53,8 @@ public class UserController {
         HashMap<String,Object> addDBname = new HashMap<>() ;
         HashMap<String,Object> addDBtype= new HashMap<>();
 
-        if(dBinfo.getDbType().equals("MongoDB")){
-            MongoTemplate mongoTemplate = (MongoTemplate) conndbService.setDataSource(dBinfo);
-            MongoDao mongoDao = new MongoDao(mongoTemplate);
-          //  List data = mongoDao.findMongoData("runoob");
-            Set colsName = mongoDao.getTableName();
-            List<Map<String,Object>> collections = new ArrayList<>();
-            for (Object col: colsName) {
-                Map<String,Object> table =new HashMap<>();
-                table.put("TABLE_NAME",col);
-                collections.add(table);
-            }
-            addDBname.put("title",dBinfo.getDbName());
-            addDBname.put("children",collections);
-            addDBtype.put("title",dBinfo.getDbType());
-            addDBtype.put("children",addDBname);
-            return addDBtype;
-        }
-
         addDBname.put("title",dBinfo.getDbName());
-        addDBname.put("children",queryService.getTableName(dBinfo.getDbType(),dBinfo.getDbName(), conndbService.getSqlsessionFactory(dBinfo.getDbType(),dBinfo.getDbName())));
+        addDBname.put("children",queryService.getTableName(dBinfo.getDbType(),dBinfo.getDbName(), conndbService.getDBConnectoion(dBinfo.getDbType(),dBinfo.getDbName())));
         addDBtype.put("title",dBinfo.getDbType());
         addDBtype.put("children",addDBname);
         return addDBtype;
@@ -80,76 +64,53 @@ public class UserController {
         * */
     }
 
-
-
-
     //获取数据库中的表名
     @GetMapping("/gettable")
     public List<Map<String,Object>> getTableName(@RequestParam String dbType,@RequestParam String dbName) {
         System.out.println("dbType:"+dbType);
         System.out.println("dbName:"+dbName);
         //这里应该写到Service层中
-        return queryService.getTableName(dbType,dbName, conndbService.getSqlsessionFactory(dbType,dbName));
+        return queryService.getTableName(dbType,dbName, conndbService.getDBConnectoion(dbType,dbName));
 
     }
-
 
     //返回对应表中的信息  gettabledata
     @GetMapping("/gettabledata")
     public List<Map<String,Object>> getTableData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName){
-        if(dbType.equals("MongoDB")){
-            System.out.println("*************************************");
-            MongoTemplate mongoTemplate = (MongoTemplate) conndbService.getDbSessionMapping(dbType,dbName);
-            MongoDao mongoDao = new MongoDao(mongoTemplate);
-            List data = mongoDao.findMongoData(tableName);
-
-            for(Iterator it = data.iterator();it.hasNext();){
-                HashMap<String,Object> o =(HashMap<String, Object>) it.next();
-                String id= o.get("_id").toString();
-                o.replace("_id",id);
-            }
-            System.out.println("MongoGetTable: "+ data);
-            return data;
-
-        }
-        else
-            return queryService.getTableData(dbType,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
+        return queryService.getTableData(dbType,tableName,conndbService.getDBConnectoion(dbType,dbName));
     }
-
 
     //返回表中元数据 gettablemetadata
     @GetMapping("/gettablemetadata")
     public List<Map<String,Object>> getTableMetaData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName){
-        if(dbType.equals("MongoDB")){
-            MongoTemplate mongoTemplate = (MongoTemplate) conndbService.getDbSessionMapping("MongoDB",dbName);
-            MongoDao mongoDao = new MongoDao(mongoTemplate);
-            return mongoDao.getMetaData(tableName);
-        }
-        else{
-            return queryService.getTableMetaData(dbType,dbName,tableName,conndbService.getSqlsessionFactory(dbType,dbName));
-        }
+        return queryService.getTableMetaData(dbType,dbName,tableName,conndbService.getDBConnectoion(dbType,dbName));
     }
 
+    @GetMapping("/mongoSearch")
+    public List<Map<String,Object>> searchByCondition(@RequestParam String dbName,@RequestParam String collectionName,@RequestParam String key_field,@RequestParam String operation,@RequestParam String keyWord){
+        System.out.println(dbName+" : "+collectionName+" : " + key_field+"  "+operation+"  "+keyWord);
+        return queryService.searchByCondition(collectionName,key_field,operation,keyWord,conndbService.getDBConnectoion("MongoDB",dbName));
+    }
 
     //去除重复的数据
     @GetMapping("/delDuplicatedData")
     public boolean delDuplicatedData(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnsName,@RequestParam String id){
-        return cleanService.delDuplicatedData(dbType,tableName,columnsName,id,conndbService.getSqlsessionFactory(dbType,dbName));
+        return cleanService.delDuplicatedData(dbType,tableName,columnsName,id,conndbService.getDBConnectoion(dbType,dbName));
     }
     @GetMapping("/delDataByNull")
     public boolean delDataByNull(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnsName,@RequestParam String method){
-        return cleanService.delDataByNull(dbType,tableName,columnsName,method,conndbService.getSqlsessionFactory(dbType,dbName));
+        return cleanService.delDataByNull(dbType,tableName,columnsName,method,conndbService.getDBConnectoion(dbType,dbName));
     }
 
     @GetMapping("/deleteTableColumn")
     public boolean deleteTableColumn(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnName){
-            return cleanService.deleteTableColumn(dbType,tableName,columnName,conndbService.getSqlsessionFactory(dbType,dbName));
+            return cleanService.deleteTableColumn(dbType,tableName,columnName,conndbService.getDBConnectoion(dbType,dbName));
     }
 
     @PostMapping("/deleteByCondition")
     public boolean deleteByCondition(@RequestBody ConditionTable conditionTable){
         System.out.println(conditionTable.toString());
-        return cleanService.deleteByCondition(conditionTable,conndbService.getSqlsessionFactory(conditionTable.getDbType(),conditionTable.getDbName()));
+        return cleanService.deleteByCondition(conditionTable,conndbService.getDBConnectoion(conditionTable.getDbType(),conditionTable.getDbName()));
     }
 
     @PostMapping("/OK")
@@ -158,34 +119,22 @@ public class UserController {
         return true;
     }
 
-    @GetMapping("/mongoSearch")
-    public List<Map<String,Object>> searchByCondition(@RequestParam String dbName,@RequestParam String collectionName,@RequestParam String key_field,@RequestParam String operation,@RequestParam String keyWord){
-        System.out.println(dbName+" : "+collectionName+" : " + key_field+" : "+operation+" : "+key_field);
-        MongoTemplate mongoTemplate = (MongoTemplate) conndbService.getDbSessionMapping("MongoDB",dbName);
-        MongoDao mongoDao = new MongoDao(mongoTemplate);
-        List data = mongoDao.searchByCondition(collectionName,key_field,operation,keyWord);
-        for(Iterator it = data.iterator();it.hasNext();){
-            HashMap<String,Object> o =(HashMap<String, Object>) it.next();
-            String id= o.get("_id").toString();
-            o.replace("_id",id);
-        }
-        return data;
-    }
+
 
     @GetMapping("/updateColumnType")
     public boolean updateColumnType(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String column,@RequestParam String oldType,@RequestParam String newType){
-        return cleanService.updateColumnType(dbType,tableName,column,oldType,newType,conndbService.getSqlsessionFactory(dbType,dbName));
+        return cleanService.updateColumnType(dbType,tableName,column,oldType,newType,conndbService.getDBConnectoion(dbType,dbName));
     }
 
     @GetMapping("/cutString")
     public boolean cutString(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnName,@RequestParam String priKey,@RequestParam String opType,@RequestParam String beginKey,@RequestParam String endKey){
-        return cleanService.cutString(dbType,tableName,columnName,priKey,opType,beginKey,endKey,conndbService.getSqlsessionFactory(dbType,dbName));
+        return cleanService.cutString(dbType,tableName,columnName,priKey,opType,beginKey,endKey,conndbService.getDBConnectoion(dbType,dbName));
     }
 
     //补全字段
     @GetMapping("/completFiled")
     public boolean completFiled(@RequestParam String dbType,@RequestParam String dbName,@RequestParam String tableName,@RequestParam String columnName,@RequestParam String completType,@RequestParam String defaultValue){
-        return cleanService.completFiled(dbType,tableName,columnName,completType,defaultValue,conndbService.getSqlsessionFactory(dbType,dbName));
+        return cleanService.completFiled(dbType,tableName,columnName,completType,defaultValue,conndbService.getDBConnectoion(dbType,dbName));
     }
 
    /* @GetMapping("/dataVerify")
@@ -197,12 +146,12 @@ public class UserController {
     @PostMapping("/dataVerify")
     public List<Map<String,Object>> dataVerify(@RequestBody RegularRequest regularRequest){
         System.out.println("data+++ "+ regularRequest);
-        return cleanService.dataVerify(regularRequest.getDbType(),regularRequest.getTableName(),regularRequest.getColumnName(),regularRequest.getPriKey(),regularRequest.getRegularExpress(),conndbService.getSqlsessionFactory(regularRequest.getDbType(),regularRequest.getDbName()));
+        return cleanService.dataVerify(regularRequest.getDbType(),regularRequest.getTableName(),regularRequest.getColumnName(),regularRequest.getPriKey(),regularRequest.getRegularExpress(),conndbService.getDBConnectoion(regularRequest.getDbType(),regularRequest.getDbName()));
     }
 
     @PostMapping("/replaceString")
     public List<Map<String,Object>> replaceString(@RequestBody RegularRequest regularRequest){
-        return cleanService.replaceString(regularRequest.getDbType(),regularRequest.getTableName(),regularRequest.getColumnName(),regularRequest.getPriKey(),regularRequest.getRegularExpress(),regularRequest.getTargetString(),conndbService.getSqlsessionFactory(regularRequest.getDbType(),regularRequest.getDbName()));
+        return cleanService.replaceString(regularRequest.getDbType(),regularRequest.getTableName(),regularRequest.getColumnName(),regularRequest.getPriKey(),regularRequest.getRegularExpress(),regularRequest.getTargetString(),conndbService.getDBConnectoion(regularRequest.getDbType(),regularRequest.getDbName()));
     }
 
     @PostMapping("/saveUpdateDate")
@@ -215,7 +164,7 @@ public class UserController {
         List<Map<String,Object>> data = (List<Map<String, Object>>) receiveData.get("data");
         System.out.println(receiveData);
 
-        return cleanService.saveUpdateDate(dbType,tableName,columnName,priKey,data,conndbService.getSqlsessionFactory(dbType,dbName));
+        return cleanService.saveUpdateDate(dbType,tableName,columnName,priKey,data,conndbService.getDBConnectoion(dbType,dbName));
 
     }
 
@@ -231,7 +180,7 @@ public class UserController {
         String targetTableName = (String)receiveData.get("targetTableName");
         List<String> targetColumnList = (List<String>) receiveData.get("targetColumnList");
 
-        return storeService.rdbToRdb(sourceDbType,sourceTableName,sourceColumnList,targetDbType,targetTableName,targetColumnList,conndbService.getSqlsessionFactory(sourceDbType,sourceDbName),conndbService.getSqlsessionFactory(targetDbType,targetDbName));
+        return storeService.rdbToRdb(sourceDbType,sourceTableName,sourceColumnList,targetDbType,targetTableName,targetColumnList,(SqlSessionFactory)conndbService.getDBConnectoion(sourceDbType,sourceDbName),(SqlSessionFactory)conndbService.getDBConnectoion(targetDbType,targetDbName));
 
     }
 
@@ -245,7 +194,7 @@ public class UserController {
         String targetDbType = (String)receiveData.get("targetDbType");
         String targetDbName = (String)receiveData.get("targetDbName");
         String targetCollectionName = (String)receiveData.get("targetCollectionName");
-        return storeService.rdbToMongo(sourceDbType,sourceTableName,sourceColumnList,targetCollectionName,conndbService.getSqlsessionFactory(sourceDbType,sourceDbName),(MongoTemplate) conndbService.getDbSessionMapping(targetDbType,targetDbName));
+        return storeService.rdbToMongo(sourceDbType,sourceTableName,sourceColumnList,targetCollectionName,(SqlSessionFactory)conndbService.getDBConnectoion(sourceDbType,sourceDbName),(MongoDbFactory) conndbService.getDBConnectoion(targetDbType,targetDbName));
     }
 
 

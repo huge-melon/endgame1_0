@@ -1,5 +1,12 @@
 package com.shixin.endgame.entity;
 
+import com.mongodb.MongoClientURI;
+import com.shixin.endgame.dao.mongodb.MongoDao;
+import com.shixin.endgame.service.ConndbService;
+import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
+
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -74,60 +81,36 @@ public class MapTable {
                 '}';
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception {
+        ConndbService conndbService = new ConndbService();
+        DBinfo dBinfo = new DBinfo();
+        dBinfo.setDbType("MongoDB");
+        dBinfo.setDbName("runoob");
+        dBinfo.setDbUrl("localhost");
+        dBinfo.setDbPort("27017");
+        dBinfo.setUserName("root");
 
-       /* String content ="I am noob " +
-                "from runoob.com.";
-        String pattern1 = ".*runo2ob.*";
-        System.out.println(Pattern.matches(pattern1,content));
+        List<String> stringList = new ArrayList<>();
+        stringList.add("userName");
+        stringList.add("class");
+        stringList.add("address");
+       // mongoDao.delDuplicatedData("user",stringList);
 
-        // 按指定模式在字符串查找
-        String line = "This order was placed for QT3000! OK?";
-        String pattern = "(\\D*)(\\d+)(.*)";
+        //mongoDao.delDataByNull("user","and",stringList);
+//        mongoDao.deleteKey("user","user_sex");
+        //mongoDao.deleteByCondition();
+       // mongoDao.updateColumnType();
 
-        Pattern r = Pattern.compile(pattern);
-        Matcher m =r.matcher(line);
-        if(m.find()){
-            System.out.println("Found value: " + m.group(0) );
-            System.out.println("Found value: " + m.group(1) );
-            System.out.println("Found value: " + m.group(2) );
-            System.out.println("Found value: " + m.group(3) );
-        }
-        else{
-            System.out.println("NO MATCH");
-        }
-*/
+        String url = "mongodb://" +dBinfo.getDbUrl() + "/" +dBinfo.getDbName(); //+ dBinfo.getUserName() + ":" + dBinfo.getUserPassword()+ "@"
+        System.out.println("MongoDB" + url);
+        MongoClientURI mongoClientURI = new MongoClientURI(url);
+        MongoDbFactory mongoDbFactory = new SimpleMongoDbFactory(mongoClientURI);
+        MongoDao mongoDao = new MongoDao(mongoDbFactory);
+      //  mongoDao.cutString();
 
-      /*  SimpleDateFormat formatter = new SimpleDateFormat("YYYY-MMM-dd HH:mm:ss:SSS");
-        String formatStr =formatter.format(new Date());
-        System.out.println(formatStr);//2017-九月-15 13:17:08:355
-
-        SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM -dd HH:mm:ss:SSS");
-        String formatStr2 =formatter2.format(new Date());
-        System.out.println(formatStr2);//2017-09-15 13:18:44:672*/
-
-        List<String> condtionList = new ArrayList<>();
-        condtionList.add("aaa");
-        condtionList.add("bbb");
-        condtionList.add("ccc");
-        condtionList.add("ddd");
-        condtionList.add("eee");
-        condtionList.add("fff");
-        condtionList.add("ggg");
-        List<String> afterModify = new ArrayList<>();
-        for (String  con: condtionList) {
-            con = con+"111";
-
-            //afterModify.add(con);
-        }
-        System.out.println(condtionList);
-
-        String n = "0123456789";
-        int pos = n.indexOf('5');
-        System.out.println("pos:  "+ pos);
-        System.out.println(n.substring(0,pos));
-        System.out.println(n.substring(pos,n.length()));
-
+/*        String str = "class,username,sex";
+        List<String> list = Arrays.asList(str);
+        System.out.println("111:  "+ list);*/
         return;
     }
 }

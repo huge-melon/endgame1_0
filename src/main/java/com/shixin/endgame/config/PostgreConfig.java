@@ -19,28 +19,22 @@ import javax.activation.DataSource;
 import java.io.IOException;
 import java.util.Properties;
 
-/*
-@Configuration*/
-@MapperScan(basePackages = "com.shixin.endgame.dao.mysql",sqlSessionFactoryRef = "mysqlSqlSessionFactory")
+
+@Configuration
+@MapperScan(basePackages = "com.shixin.endgame.dao.postgresql")
 
 public class PostgreConfig {
 
-    private DBinfo dBinfo;
     //private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public PostgreConfig(){
-
-    }
-    public PostgreConfig(DBinfo db){
-        dBinfo=db;
-        System.out.println("Const:  "+dBinfo.toString());
 
     }
 
     /*
         @Bean(name = "postgreDataSource")
     */
-    public PooledDataSource postgreDataSource() {
+    public SqlSessionFactory postgreSqlSessionFactory(DBinfo dBinfo) throws Exception {
 
         System.out.println("dataSource:  "+dBinfo.toString());
         String url = "jdbc:postgresql://" + dBinfo.getDbUrl() + ':' + dBinfo.getDbPort() + '/' + dBinfo.getDbName();
@@ -52,14 +46,25 @@ public class PostgreConfig {
         dataSource.setUrl(url + conf);
         dataSource.setUsername(dBinfo.getUserName());
         dataSource.setPassword(dBinfo.getUserPassword());
-        return dataSource;
+        SqlSessionFactoryBean sessionFactoryBean = new SqlSessionFactoryBean();
+
+        sessionFactoryBean.setDataSource(dataSource);
+
+        sessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapper/postgresql/*.xml"));
+
+        System.out.println("postgreDataSource sqlSessionFactory  "+dBinfo.toString());
+        System.out.println(sessionFactoryBean.getObject().toString());
+        return sessionFactoryBean.getObject();
     }
 
 
     /*
         @Bean(name = "mysqlSqlSessionFactory")
     */
-    public SqlSessionFactory sqlSessionFactory(/*@Qualifier("postgreDataSource")*/ PooledDataSource dataSource) throws Exception {
+/*
+    public SqlSessionFactory sqlSessionFactory(*/
+/*@Qualifier("postgreDataSource")*//*
+ PooledDataSource dataSource) throws Exception {
         SqlSessionFactoryBean sessionFactoryBean = new SqlSessionFactoryBean();
         sessionFactoryBean.setDataSource(dataSource);
         sessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapper/postgresql/*.xml"));
@@ -69,6 +74,7 @@ public class PostgreConfig {
 
         return sessionFactoryBean.getObject();
     }
+*/
 
 }
 

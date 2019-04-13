@@ -5,6 +5,7 @@ import com.shixin.endgame.dao.mysql.MysqlMapper;
 import com.shixin.endgame.dao.postgresql.PostgresqlMapper;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
@@ -65,7 +66,7 @@ public class StoreService {
         return false;
     }
 
-    public boolean rdbToMongo(String sourceDbType, String sourceTableName, List<String> sourceColumnList, String targetCollectionName, SqlSessionFactory sqlSessionFactory, MongoTemplate mongoTemplate) {
+    public boolean rdbToMongo(String sourceDbType, String sourceTableName, List<String> sourceColumnList, String targetCollectionName, SqlSessionFactory sqlSessionFactory, MongoDbFactory mongoDbFactory) {
         SqlSession session = sqlSessionFactory.openSession();
         List<Map<String,Object>> sourceData  = null;
         if (sourceDbType.equals("MySQL")){
@@ -82,12 +83,16 @@ public class StoreService {
             return false;
         }
 
-        MongoDao mongoDao = new MongoDao(mongoTemplate);
+        MongoDao mongoDao = new MongoDao(mongoDbFactory);
         mongoDao.insertData(targetCollectionName,sourceData);
 
         return true;
 
 
+    }
+
+    public boolean mongoToMongo(){
+        return true;
     }
 
     //数据转换
