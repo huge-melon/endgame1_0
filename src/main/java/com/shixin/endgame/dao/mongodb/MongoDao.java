@@ -292,31 +292,42 @@ public class MongoDao {
         return true;
     }
 
-    //平均数
-    public Double getAverage(String collectionName,String keyName){
-
-
-
-        AggregationResults<Map> aggregationResults = mongoTemplate.aggregate(aggregation,collectionName,Map.class);
-
-
-    }
     //众数
     public Double getMode(String collectionName,String keyName){
-        Aggregation aggregation = newAggregation(group(keyName).count().as("count").max("$count").as("maxNum"));
+        Aggregation aggregation = newAggregation(group(keyName).count().as("count"));
 
+        double count = -1;
+        Double result = 0.0;
         AggregationResults<Map> aggregationResults = mongoTemplate.aggregate(aggregation,collectionName,Map.class);
-
         for (Iterator<Map> iterator = aggregationResults.iterator(); iterator.hasNext();) {
-            System.out.println(iterator.next());
+            Map <String,Object> map = iterator.next();
+            System.out.println(map);
+            if((Integer)map.get("count") > count){
+                if(map.get("_id") == null){
+                    continue;
+                }
+                result  = Double.parseDouble(map.get("_id").toString());
+                count = (Integer)map.get("count");
+            }
         }
-        return 0.0;
-
+        System.out.println("众数：   "+result);
+        return result;
     }
-    //中位数
-    public Double getMedian(String collectionName,String keyName){
 
+    public boolean completFiled(String collectionName,String keyName,Double data){
+        Query query = new Query();
+        query.addCriteria(Criteria.where(keyName).is(null));
+        Update update = new Update();
+        update.set(keyName,data);
+        mongoTemplate.updateMulti(query,update,collectionName);
+        System.out.println("补全的位置：  "+mongoTemplate.find(query,Map.class,collectionName));
+        return true;
     }
+
+//    //中位数
+//    public Double getMedian(String collectionName,String keyName){
+//
+//    }
 
 /*    public List dataVerify(String collectionName,String keyName,String regularExpress){
         BasicDBObject basicDBObject = new BasicDBObject();

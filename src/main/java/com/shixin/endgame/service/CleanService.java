@@ -384,21 +384,53 @@ public class CleanService {
             MongoDao mongoDao = new MongoDao(mongoDbFactory);
 
             if(completType.equals("average")){
-                List<Double> data= mongoDao.getDataByKey(tableName,columnName);
+                List<Map> data= mongoDao.getDataByKey(tableName,columnName);
                 Double sum=0.0;
-                for(Double num:data){
-                    sum+=num;
+                System.out.println("data: average :" + data);
+                for(Map num:data){
+                    if(num.get(columnName)==null){
+                        System.out.println(num);
+                        System.out.println(num.get(columnName));
+                        continue;
+                    }
+                    sum+=Double.parseDouble(num.get(columnName).toString());
                 }
                 compleValue = sum/data.size();
+                System.out.println("平均数：  "+compleValue);
             }else if(completType.equals("mode")){
-
-
+                compleValue = mongoDao.getMode(tableName,columnName);
+                System.out.println("众数：  "+compleValue);
             }else if(completType.equals("median")){
 
-            }else {
+                List<Map> data= mongoDao.getDataByKey(tableName,columnName);
+                List<Double> numbers =new ArrayList<>();
+                for(Map num:data){
+                    if(num.get(columnName)==null){
+                        System.out.println(num);
+                        continue;
+                    }
+                    numbers.add(Double.parseDouble(num.get(columnName).toString()));
+                }
+                System.out.println(numbers);
 
+                Collections.sort(numbers);
+
+
+                int size = numbers.size();
+                if(size%2==0){
+                    compleValue = (numbers.get((size>>1))+numbers.get(((size>>1)-1)))/2;
+                }
+                else{
+                    compleValue = numbers.get(size>>1);
+                }
+                System.out.println("中位数：  "+compleValue);
             }
-            mysqlMapper.completFiled(tableName,columnName,compleValue);
+            else {
+                compleValue=Double.parseDouble(defaultValue);
+                System.out.println("customize:  " + compleValue);
+            }
+            mongoDao.completFiled(tableName,columnName,compleValue);
+          //  mysqlMapper.completFiled(tableName,columnName,compleValue);
             return true;
 
         }else{
