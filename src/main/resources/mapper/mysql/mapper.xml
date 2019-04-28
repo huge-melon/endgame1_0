@@ -29,7 +29,7 @@
     <select id="getTableMetaData" resultType="java.util.Map">
         select COLUMN_NAME,COLUMN_TYPE,COLUMN_KEY,IS_NULLABLE,COLUMN_COMMENT from information_schema.COLUMNS where TABLE_SCHEMA= #{db_name} and TABLE_NAME= #{table_name}
     </select>
-    
+
     <!--删除表中重复数据,如果表没有主键该怎么办-->
     <delete id="delDuplicatedData">
         DELETE FROM ${table_name} WHERE ( ${columns_name} ) IN (
@@ -45,7 +45,7 @@
         <foreach collection="columns_name" item="columns" separator=" is NULL and ">
             ${columns}
         </foreach>
-       is null
+        is null
     </delete>
     <!--与条件删除表项为空的行or方法-->
     <delete id="delDataByNullOr">
@@ -119,10 +119,12 @@
 
     <!--获得指定列的数据-->
     <select id="getUserDefineData" resultType="java.util.Map">
-        select <foreach collection="columns_name" item="column_name" separator=",">${column_name}</foreach> from ${table_name}
+        select <foreach collection="columns_name" item="column_name" separator=",">${column_name}</foreach> from
+        ${table_name}
     </select>
 
     <insert id="insertData">
-        insert into ${table_name}( <foreach collection="columns_name" item="column_name" separator=",">${column_name}</foreach>) values(${column_value})
+        insert into ${table_name}( <foreach collection="columns_name" item="column_name" separator=",">
+        ${column_name}</foreach>) values(${column_value})
     </insert>
 </mapper>

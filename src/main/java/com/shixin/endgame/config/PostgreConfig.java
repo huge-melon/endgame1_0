@@ -27,7 +27,7 @@ public class PostgreConfig {
 
     //private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public PostgreConfig(){
+    public PostgreConfig() {
 
     }
 
@@ -36,7 +36,7 @@ public class PostgreConfig {
     */
     public SqlSessionFactory postgreSqlSessionFactory(DBinfo dBinfo) throws Exception {
 
-        System.out.println("dataSource:  "+dBinfo.toString());
+        System.out.println("dataSource:  " + dBinfo.toString());
         String url = "jdbc:postgresql://" + dBinfo.getDbUrl() + ':' + dBinfo.getDbPort() + '/' + dBinfo.getDbName();
         //修改地方，添加连接属性
         String conf = "?serverTimezone=GMT%2B8";
@@ -52,7 +52,7 @@ public class PostgreConfig {
 
         sessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapper/postgresql/*.xml"));
 
-        System.out.println("postgreDataSource sqlSessionFactory  "+dBinfo.toString());
+        System.out.println("postgreDataSource sqlSessionFactory  " + dBinfo.toString());
         System.out.println(sessionFactoryBean.getObject().toString());
         return sessionFactoryBean.getObject();
     }
@@ -63,7 +63,7 @@ public class PostgreConfig {
     */
 /*
     public SqlSessionFactory sqlSessionFactory(*/
-/*@Qualifier("postgreDataSource")*//*
+    /*@Qualifier("postgreDataSource")*//*
  PooledDataSource dataSource) throws Exception {
         SqlSessionFactoryBean sessionFactoryBean = new SqlSessionFactoryBean();
         sessionFactoryBean.setDataSource(dataSource);

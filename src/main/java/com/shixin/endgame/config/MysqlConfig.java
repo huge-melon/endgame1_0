@@ -27,10 +27,10 @@ import java.util.Properties;
 
 public class MysqlConfig {
 
-  /*  private DBinfo dBinfo;
-    //private final Logger logger = LoggerFactory.getLogger(this.getClass());
-*/
-    public MysqlConfig(){
+    /*  private DBinfo dBinfo;
+      //private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  */
+    public MysqlConfig() {
 
     }
    /* public MysqlConfig(DBinfo db){
@@ -44,7 +44,7 @@ public class MysqlConfig {
 
     public SqlSessionFactory mysqlSqlSessionFactory(DBinfo dBinfo) throws Exception {
 
-        System.out.println("dataSource:  "+dBinfo.toString());
+        System.out.println("dataSource:  " + dBinfo.toString());
         String url = "jdbc:mysql://" + dBinfo.getDbUrl() + ':' + dBinfo.getDbPort() + '/' + dBinfo.getDbName();
         //修改地方，添加连接属性
         String conf = "?serverTimezone=GMT%2B8";
@@ -59,7 +59,7 @@ public class MysqlConfig {
         sessionFactoryBean.setDataSource(dataSource);
         sessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapper/mysql/*.xml"));
 
-        System.out.println("sqlSessionFactory"+dBinfo.toString());
+        System.out.println("sqlSessionFactory" + dBinfo.toString());
         System.out.println(sessionFactoryBean.getObject().toString());
 
         return sessionFactoryBean.getObject();
@@ -70,7 +70,7 @@ public class MysqlConfig {
 /*
     @Bean(name = "mysqlSqlSessionFactory")
 */
- /*   public SqlSessionFactory sqlSessionFactory(*//*@Qualifier("mysqlDataSource")*//* PooledDataSource dataSource) throws Exception {
+    /*   public SqlSessionFactory sqlSessionFactory(*//*@Qualifier("mysqlDataSource")*//* PooledDataSource dataSource) throws Exception {
         SqlSessionFactoryBean sessionFactoryBean = new SqlSessionFactoryBean();
         sessionFactoryBean.setDataSource(dataSource);
         sessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath*:mapper/mysql/*.xml"));

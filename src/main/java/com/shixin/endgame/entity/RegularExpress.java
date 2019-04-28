@@ -1,6 +1,6 @@
 package com.shixin.endgame.entity;
 
-public class RegularRequest {
+public class RegularExpress {
     private String dbType;
     private String dbName;
     private String tableName;
@@ -9,10 +9,10 @@ public class RegularRequest {
     private String regularExpress;
     private String targetString;
 
-    public RegularRequest() {
+    public RegularExpress() {
     }
 
-    public RegularRequest(String dbType, String dbName, String tableName, String columnName, String priKey, String regularExpress, String targetString) {
+    public RegularExpress(String dbType, String dbName, String tableName, String columnName, String priKey, String regularExpress, String targetString) {
         this.dbType = dbType;
         this.dbName = dbName;
         this.tableName = tableName;
@@ -80,7 +80,7 @@ public class RegularRequest {
 
     @Override
     public String toString() {
-        return "RegularRequest{" +
+        return "RegularExpress{" +
                 "dbType='" + dbType + '\'' +
                 ", dbName='" + dbName + '\'' +
                 ", tableName='" + tableName + '\'' +
