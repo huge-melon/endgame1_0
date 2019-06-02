@@ -121,14 +121,10 @@ public class MongoDao {
         for (Iterator<Map> iterator = aggregationResults.iterator(); iterator.hasNext(); ) {
             Map<String, Object> data = iterator.next();
             List<ObjectId> dups = (List<ObjectId>) data.get("dups");
-            System.out.println("before:  " + dups);
-            System.out.println(data);
             dups.remove(0);
-            System.out.println("after:  " + dups);
             for (ObjectId id : dups) {
                 Query query = new Query();
                 query.addCriteria(Criteria.where("_id").is(id));
-                System.out.println(mongoTemplate.find(query, Map.class, collectionName));
                 mongoTemplate.remove(query, collectionName);
             }
         }

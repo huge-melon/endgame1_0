@@ -25,6 +25,9 @@ public class StoreService {
 
         List<Map<String, Object>> sourceData = null;
         //源数据库提取数据
+
+        long startTime=System.currentTimeMillis();   //获取开始时间
+
         if (sourceDbType.equals("MySQL")) {
             mysqlMapper = sourceSession.getMapper(MysqlMapper.class);
             sourceData = mysqlMapper.getUserDefineData(sourceTableName, sourceColumnList);
@@ -47,6 +50,8 @@ public class StoreService {
                 System.out.println("targetData:  " + targetData);
                 mysqlMapper.insertData(targetTableName, targetColumnList, targetData);
             }
+            long endTime=System.currentTimeMillis(); //获取结束时间
+            System.out.println("转储到MySQL运行时间： "+(endTime-startTime)+"ms");
             return true;
         } else if (targetDbType.equals("PostgreSQL")) {
             postgresqlMapper = targetSession.getMapper(PostgresqlMapper.class);
@@ -58,6 +63,8 @@ public class StoreService {
                 targetData = targetData.substring(0, targetData.length() - 1);
                 postgresqlMapper.insertData(targetTableName, targetColumnList, targetData);
             }
+            long endTime=System.currentTimeMillis(); //获取结束时间
+            System.out.println("转储到PostgreSQL运行时间： "+(endTime-startTime)+"ms");
             return true;
         } else {
             System.out.println("target error");
@@ -68,6 +75,8 @@ public class StoreService {
     public boolean rdbToMongo(String sourceDbType, String sourceTableName, List<String> sourceColumnList, String targetCollectionName, SqlSessionFactory sqlSessionFactory, MongoDbFactory mongoDbFactory) {
         SqlSession session = sqlSessionFactory.openSession();
         List<Map<String, Object>> sourceData = null;
+        long startTime=System.currentTimeMillis();   //获取开始时间
+
         if (sourceDbType.equals("MySQL")) {
             mysqlMapper = session.getMapper(MysqlMapper.class);
             sourceData = mysqlMapper.getUserDefineData(sourceTableName, sourceColumnList);
@@ -82,6 +91,9 @@ public class StoreService {
 
         MongoDao mongoDao = new MongoDao(mongoDbFactory);
         mongoDao.insertData(targetCollectionName, sourceData);
+
+        long endTime=System.currentTimeMillis(); //获取结束时间
+        System.out.println("转储到MongoDB运行时间： "+(endTime-startTime)+"ms");
 
         return true;
 

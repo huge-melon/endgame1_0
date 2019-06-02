@@ -28,7 +28,11 @@ public class CleanService {
             SqlSession session = sqlSessionFactory.openSession();
             mysqlMapper = session.getMapper(MysqlMapper.class);
             String column = columnsName.split(",")[0];
+            long startTime=System.currentTimeMillis();   //获取开始时间
             mysqlMapper.delDuplicatedData(tableName, columnsName, column, id);
+            long endTime=System.currentTimeMillis(); //获取结束时间
+            System.out.println("MySQL去重运行时间： "+(endTime-startTime)+"ms");
+
             return true;
         } else if (dbType.equals("PostgreSQL")) {
             SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) dbConnect;
@@ -45,7 +49,10 @@ public class CleanService {
             MongoDbFactory mongoDbFactory = (MongoDbFactory) dbConnect;
             mongoDao = new MongoDao(mongoDbFactory);
             List<String> keysName = Arrays.asList(columnsName.split(","));
+            long startTime=System.currentTimeMillis();   //获取开始时间
             mongoDao.delDuplicatedData(tableName, keysName);
+            long endTime=System.currentTimeMillis(); //获取结束时间
+            System.out.println("MongoDB去重运行时间： "+(endTime-startTime)+"ms");
             return true;
         } else {
             System.out.println("error");
